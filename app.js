@@ -333,3 +333,16 @@ banner.addEventListener('click', e => { if (e.target === banner) showNextBanner(
 buildCard(false);
 setGpsStatus();
 refreshAll();
+
+// Footer build id: live commit SHA from GitHub (reflects the deployed main).
+(function showSha(){
+  const el = $('sha'); if (!el) return;
+  fetch('https://api.github.com/repos/markfili/park-suma/commits/main')
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(d => {
+      if (!d || !d.sha) return;
+      el.innerHTML = '· <a href="https://github.com/markfili/park-suma/commit/' +
+        d.sha + '" target="_blank" rel="noopener">' + d.sha.slice(0, 7) + '</a>';
+    })
+    .catch(() => {});  // offline / rate-limited → just show the semver
+})();
