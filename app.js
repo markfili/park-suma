@@ -1,9 +1,12 @@
 // Zagreb Park-Šuma Bingo — game logic.
-// Depends on PARKS (from parks.js) and Leaflet's global L (optional).
+// Depends on PARKS (parks.js, loaded first) and Leaflet's global L (optional).
+// scratch.js (loaded after) reuses the globals exposed here.
 
-const FREE = 12;                         // center cell of the 5×5
+const FREE = 12;                          // center cell of the 5×5
 const STORAGE_KEY = "parkSumaBingo:v2";
-const CHECKIN_M = 300;                    // GPS check-in radius (metres)
+const SEEN_VERSION_KEY = "parkSumaBingo:seenVersion";
+const CHECKIN_M = 300;                     // GPS check-in radius (metres)
+const APP_VERSION = "0.6.0";               // single source of truth for the version
 
 // Level ladder — the headline progression (visit count -> tier).
 const TIERS = [
@@ -16,6 +19,35 @@ const TIERS = [
   { n: 24, name: "Forest Champion", emoji: "🏆" },
 ];
 
+// Changelog (newest first) — drives the "What's new" tab and update detection.
+const CHANGELOG = [
+  { v: "0.6.0", notes: [
+    "🎟 “Where to next?” scratch card — scratch to reveal a random unvisited park and set it as your 🎯 goal.",
+    "ℹ️ This help dialog: How to play + What’s new (pops up automatically after an update).",
+  ]},
+  { v: "0.5.0", notes: ["Live commit SHA shown next to the version in the footer."] },
+  { v: "0.4.0", notes: [
+    "🗺 Map view (Leaflet / OpenStreetMap) with a Card ⇄ Map toggle.",
+    "📍 GPS check-in — mark a park only when you’re within 300 m (honor-mode fallback).",
+    "Progression: levels by count, a Bingo-line bonus, and district sweeps.",
+  ]},
+  { v: "0.3.0", notes: ["Progress now saved in your browser (localStorage)."] },
+  { v: "0.2.0", notes: ["Split into static files and deployed on GitHub Pages."] },
+  { v: "0.1.0", notes: ["First version: a 5×5 bingo of Zagreb’s 24 forest parks."] },
+];
+
+const HOWTO = `
+  <p><strong>Goal:</strong> visit all 24 protected <em>park-šume</em> (forest parks) of Zagreb.</p>
+  <ul>
+    <li><strong>Mark a park</strong> by tapping its tile or its map pin. In honor mode you can mark anytime; tap
+        <strong>📍 Locate me</strong> to require a real GPS check-in (within ${CHECKIN_M} m).</li>
+    <li><strong>Level up</strong> as your count grows (🌰 → 🏆). Line up 5 in a row for a <strong>Bingo</strong> bonus,
+        and finish every park in a district for a <strong>sweep</strong>.</li>
+    <li><strong>🎟 Where next?</strong> scratches a random unvisited park — Accept it to set a 🎯 goal that shows on
+        the map and card.</li>
+    <li><strong>🔀 Nova kartica</strong> reshuffles the board. Progress saves automatically.</li>
+  </ul>`;
+
 // ---- DOM ----
 const $ = id => document.getElementById(id);
 const board = $('board'), countEl = $('count');
@@ -27,7 +59,7 @@ const toastEl = $('toast');
 // ---- derived data ----
 const NAMES = PARKS.map(p => p.name);
 const BY_NAME = Object.fromEntries(PARKS.map(p => [p.name, p]));
-const DISTRICTS = [];                      // [{name, parks:[...]}] in west→east order
+const DISTRICTS = [];                       // [{name, parks:[...]}] west→east
 PARKS.forEach(p => {
   let d = DISTRICTS.find(x => x.name === p.district);
   if (!d) { d = { name: p.district, parks: [] }; DISTRICTS.push(d); }
@@ -73,14 +105,34 @@ function load(){
     }
     return {
       visited, order,
+      goal: (typeof s.goal === 'string' && set.has(s.goal)) ? s.goal : null,
       seenTiers: Array.isArray(s.seenTiers) ? s.seenTiers : [],
       seenDistricts: Array.isArray(s.seenDistricts) ? s.seenDistricts : [],
     };
-  } catch(e){ return { visited:{}, order:null, seenTiers:[], seenDistricts:[] }; }
+  } catch(e){ return { visited:{}, order:null, goal:null, seenTiers:[], seenDistricts:[] }; }
 }
 function save(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){} }
 
 let state = load();
+
+// ---- goal (scratch card destination) ----
+function getGoal(){ return state.goal || null; }
+function setGoal(name){ state.goal = name; save(); refreshAll(); }
+function clearGoal(){ state.goal = null; save(); refreshAll(); }
+function pickNext(){ const pool = PARKS.filter(p => !isVisited(p.name)); return pool.length ? pool[Math.random()*pool.length|0] : null; }
+function completesDistrict(name){
+  const d = DISTRICTS.find(x => x.parks.includes(name));
+  return !!(d && !isVisited(name) && d.parks.filter(isVisited).length === d.parks.length - 1);
+}
+function refreshGoal(){
+  const chip = $('goalChip'); if (!chip) return;
+  const g = state.goal;
+  if (g && !isVisited(g)) {
+    let txt = '🎯 Goal: ' + g;
+    if (gpsActive && userPos) { const p = BY_NAME[g]; txt += ' (' + fmtDist(haversine(userPos.lat, userPos.lon, p.lat, p.lon)) + ')'; }
+    chip.textContent = txt; chip.style.display = '';
+  } else { chip.textContent = ''; chip.style.display = 'none'; }
+}
 
 // ---- board (card view) ----
 let cells = [], cellNames = [], bingoSeen = new Set();
@@ -107,29 +159,31 @@ function buildCard(fresh){
       pin.title = 'Open in Google Maps';
       pin.addEventListener('click', e => e.stopPropagation());
       cell.appendChild(pin);
-      if (isVisited(name)) cell.classList.add('marked');
       cell.addEventListener('click', () => attemptCheckin(name));
     }
     board.appendChild(cell); cells.push(cell);
   }
-  bingoSeen = new Set(completeLines().map(l => l.join(',')));  // don't re-celebrate existing lines
-  highlightLines();
+  bingoSeen = new Set(completeLines().map(l => l.join(',')));
+  refreshCardCells();
 }
 
 function highlightLines(){
-  const winning = completeLines();
-  const idx = new Set(winning.flat());
+  const idx = new Set(completeLines().flat());
   cells.forEach((c,i) => c.classList.toggle('win', idx.has(i)));
 }
-
 function refreshCardCells(){
-  cells.forEach((c,i) => { if (i !== FREE) c.classList.toggle('marked', isVisited(cellNames[i])); });
+  cells.forEach((c,i) => {
+    if (i === FREE) return;
+    const n = cellNames[i];
+    c.classList.toggle('marked', isVisited(n));
+    c.classList.toggle('goal', !isVisited(n) && n === state.goal);
+  });
   highlightLines();
 }
 
 // ---- check-in (honor + GPS) ----
 function attemptCheckin(name){
-  if (isVisited(name)) { setVisited(name, false); return; }     // un-checking is always allowed
+  if (isVisited(name)) { setVisited(name, false); return; }     // un-checking always allowed
   if (gpsActive && userPos) {
     const pk = BY_NAME[name];
     const d = haversine(userPos.lat, userPos.lon, pk.lat, pk.lon);
@@ -138,7 +192,6 @@ function attemptCheckin(name){
   }
   setVisited(name, true);
 }
-
 function setVisited(name, on){
   if (on) state.visited[name] = todayISO(); else delete state.visited[name];
   save();
@@ -160,11 +213,15 @@ function flushBanners(){ if (!bannerOpen) showNextBanner(); }
 function celebrate(name){
   const count = visitedCount();
 
+  // reaching your scratch-card goal
+  if (state.goal && name === state.goal) {
+    queueBanner("🎯", "Destiny reached!", `You made it to your goal: ${name}!`);
+    state.goal = null; save(); refreshGoal();
+  }
   // bonus: new bingo line(s)
   const newLines = completeLines().filter(l => !bingoSeen.has(l.join(',')));
   newLines.forEach(l => bingoSeen.add(l.join(',')));
   if (newLines.length) queueBanner("🎯", "BINGO!", "You linked up 5 forest parks in a line — bonus!");
-
   // district sweep
   const dName = BY_NAME[name].district;
   const dist = DISTRICTS.find(d => d.name === dName);
@@ -172,8 +229,7 @@ function celebrate(name){
     state.seenDistricts.push(dName); save();
     queueBanner("🗺️", "District swept!", `You've visited every park-šuma in ${dName}.`);
   }
-
-  // level up (1/5/10/15/20), champion (24) handled last as the finale
+  // level up (1/5/10/15/20); champion (24) as the finale
   TIERS.filter(t => t.n >= 1 && t.n < 24).forEach(t => {
     if (count >= t.n && !state.seenTiers.includes(t.n)) {
       state.seenTiers.push(t.n); save();
@@ -184,7 +240,6 @@ function celebrate(name){
     state.seenTiers.push(24); save();
     queueBanner("🏆", "Forest Champion!", "All 24 park-šume of Zagreb visited. Bravo! 🌲");
   }
-
   flushBanners();
 }
 
@@ -198,7 +253,6 @@ function refreshProgress(){
   const pct = next ? (count - tier.n) / (next.n - tier.n) * 100 : 100;
   trackFill.style.width = Math.max(0, Math.min(100, pct)) + "%";
 }
-
 function refreshDistricts(){
   districtsEl.innerHTML = '';
   DISTRICTS.forEach(d => {
@@ -209,7 +263,6 @@ function refreshDistricts(){
     districtsEl.appendChild(chip);
   });
 }
-
 function refreshNearest(){
   if (!gpsActive || !userPos) { nearHint.textContent = ''; return; }
   const unvisited = PARKS.filter(p => !isVisited(p.name));
@@ -218,19 +271,16 @@ function refreshNearest(){
   unvisited.forEach(p => { const d = haversine(userPos.lat, userPos.lon, p.lat, p.lon); if (d < bestD) { bestD = d; best = p; } });
   nearHint.textContent = `📍 Nearest unvisited: ${best.name} (${fmtDist(bestD)})`;
 }
-
-function refreshAll(){ refreshCardCells(); refreshMapStyles(); refreshProgress(); refreshDistricts(); refreshNearest(); }
+function refreshAll(){ refreshCardCells(); refreshMapStyles(); refreshProgress(); refreshDistricts(); refreshNearest(); refreshGoal(); }
 
 // ---- map view ----
 let map = null, markers = {}, userMarker = null, mapReady = false;
-
 function initMap(){
   if (mapReady || typeof L === 'undefined') return;
   map = L.map('map', { zoomControl: true });
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19, attribution: '&copy; OpenStreetMap contributors'
   }).addTo(map);
-
   const pts = [];
   PARKS.forEach(p => {
     const m = L.circleMarker([p.lat, p.lon], markerStyle(p.name)).addTo(map);
@@ -244,26 +294,23 @@ function initMap(){
   }
   mapReady = true;
 }
-
 function markerStyle(name){
-  const on = isVisited(name);
-  return { radius: 9, weight: 2,
-    color: on ? '#eafff3' : '#7fcfa3',
-    fillColor: on ? '#2fae6f' : '#3a5d4d',
+  const on = isVisited(name), goal = !on && name === state.goal;
+  return { radius: goal ? 11 : 9, weight: goal ? 3 : 2,
+    color: goal ? '#ffd56b' : (on ? '#eafff3' : '#7fcfa3'),
+    fillColor: on ? '#2fae6f' : (goal ? '#caa23a' : '#3a5d4d'),
     fillOpacity: 0.95 };
 }
-
 function popupHtml(p){
   const on = isVisited(p.name);
   let dist = '';
   if (gpsActive && userPos) dist = ` · ${fmtDist(haversine(userPos.lat, userPos.lon, p.lat, p.lon))} away`;
-  const status = on ? `✅ visited ${state.visited[p.name]}` : 'not visited yet';
+  const status = on ? `✅ visited ${state.visited[p.name]}` : (p.name === state.goal ? '🎯 your goal' : 'not visited yet');
   const approx = p.approx ? ' <span class="pop-meta">(approx. location)</span>' : '';
   const btn = `<button class="pop-btn" onclick="attemptCheckin('${p.name.replace(/'/g, "\\'")}')">${on ? 'Un-check' : 'Check in'}</button>`;
   const link = `<a class="pop-link" href="${mapsLink(p.name)}" target="_blank" rel="noopener">Maps ↗</a>`;
   return `<b>${p.name}</b>${approx}<br><span class="pop-meta">${p.district} · ${status}${dist}</span><br>${btn}${link}`;
 }
-
 function refreshMapStyles(){
   if (!mapReady) return;
   PARKS.forEach(p => { if (markers[p.name]) markers[p.name].setStyle(markerStyle(p.name)); });
@@ -273,9 +320,7 @@ function refreshMapStyles(){
 // ---- GPS ----
 let gpsActive = false, userPos = null, watchId = null;
 function setGpsStatus(){
-  gpsStatus.textContent = gpsActive
-    ? `GPS on — check-ins gated to ≤${CHECKIN_M} m`
-    : "GPS off — honor mode";
+  gpsStatus.textContent = gpsActive ? `GPS on — check-ins gated to ≤${CHECKIN_M} m` : "GPS off — honor mode";
 }
 function toggleGps(){
   if (gpsActive) { stopGps(); return; }
@@ -291,7 +336,7 @@ function toggleGps(){
           { radius: 7, weight: 2, color: '#fff', fillColor: '#4aa3ff', fillOpacity: 1 }).addTo(map);
         else userMarker.setLatLng([userPos.lat, userPos.lon]);
       }
-      refreshNearest();
+      refreshNearest(); refreshGoal();
     },
     err => { toast("Couldn't get location — honor mode (tap to mark)"); stopGps(); },
     { enableHighAccuracy: true, maximumAge: 15000, timeout: 20000 }
@@ -302,7 +347,7 @@ function stopGps(){
   watchId = null; gpsActive = false; userPos = null;
   $('locate').classList.remove('on'); $('locate').textContent = '📍 Locate me';
   if (userMarker && map) { map.removeLayer(userMarker); userMarker = null; }
-  setGpsStatus(); refreshNearest();
+  setGpsStatus(); refreshNearest(); refreshGoal();
 }
 
 // ---- toast ----
@@ -317,9 +362,29 @@ function showView(which){
   document.querySelectorAll('.seg').forEach(s => s.classList.toggle('active', s.dataset.view === which));
   $('cardView').classList.toggle('active', which === 'card');
   $('mapView').classList.toggle('active', which === 'map');
-  if (which === 'map') {
-    initMap();
-    if (mapReady) setTimeout(() => { map.invalidateSize(); }, 0);  // container just became visible
+  if (which === 'map') { initMap(); if (mapReady) setTimeout(() => map.invalidateSize(), 0); }
+}
+
+// ---- help / changelog modal ----
+function renderHelp(tab){
+  document.querySelectorAll('.help-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  const body = $('helpBody');
+  if (tab === 'news') {
+    body.innerHTML = CHANGELOG.map((c, i) =>
+      `<div class="cl${i === 0 ? ' cur' : ''}"><h4>v${c.v}${i === 0 ? ' · current' : ''}</h4><ul>` +
+      c.notes.map(n => `<li>${n}</li>`).join('') + `</ul></div>`).join('');
+  } else {
+    body.innerHTML = HOWTO;
+  }
+}
+function openHelp(tab){ renderHelp(tab || 'howto'); $('help').classList.add('show'); }
+function closeHelp(){ $('help').classList.remove('show'); }
+function maybeShowWhatsNew(){
+  let seen = null;
+  try { seen = localStorage.getItem(SEEN_VERSION_KEY); } catch(e){}
+  if (seen !== APP_VERSION) {
+    openHelp(seen ? 'news' : 'howto');     // first-timers: How to play; returning after update: What's new
+    try { localStorage.setItem(SEEN_VERSION_KEY, APP_VERSION); } catch(e){}
   }
 }
 
@@ -329,10 +394,17 @@ $('new').addEventListener('click', () => { buildCard(true); refreshAll(); });
 $('locate').addEventListener('click', toggleGps);
 $('bClose').addEventListener('click', showNextBanner);
 banner.addEventListener('click', e => { if (e.target === banner) showNextBanner(); });
+$('infoBtn').addEventListener('click', () => openHelp('howto'));
+$('helpX').addEventListener('click', closeHelp);
+$('help').addEventListener('click', e => { if (e.target === $('help')) closeHelp(); });
+$('helpTabs').addEventListener('click', e => { const t = e.target.closest('.help-tab'); if (t) renderHelp(t.dataset.tab); });
 
+// ---- init ----
 buildCard(false);
 setGpsStatus();
 refreshAll();
+$('appVer').textContent = 'v' + APP_VERSION;
+maybeShowWhatsNew();
 
 // Footer build id: live commit SHA from GitHub (reflects the deployed main).
 (function showSha(){
@@ -344,5 +416,5 @@ refreshAll();
       el.innerHTML = '· <a href="https://github.com/markfili/park-suma/commit/' +
         d.sha + '" target="_blank" rel="noopener">' + d.sha.slice(0, 7) + '</a>';
     })
-    .catch(() => {});  // offline / rate-limited → just show the semver
+    .catch(() => {});
 })();

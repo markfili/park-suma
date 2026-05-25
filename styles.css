@@ -189,3 +189,75 @@ footer { color: var(--mint-dim); font-size: .72rem; margin-top: 18px; text-align
   z-index: 1100; max-width: 86vw; text-align: center;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ---- info button ---- */
+header { position: relative; }
+.info-btn {
+  position: absolute; top: 0; right: 0;
+  width: 34px; height: 34px; padding: 0; line-height: 1;
+  background: transparent; color: var(--mint);
+  border: 1px solid var(--line); border-radius: 50%;
+  font-size: 1rem; cursor: pointer;
+}
+
+/* ---- goal ---- */
+.goal-chip { color: var(--gold); font-weight: 600; }
+.cell.goal { box-shadow: 0 0 0 2px var(--gold) inset; animation: goalpulse 1.5s ease-in-out infinite; }
+@keyframes goalpulse {
+  0%,100% { box-shadow: 0 0 0 2px var(--gold) inset; }
+  50%     { box-shadow: 0 0 0 2px var(--gold) inset, 0 0 12px var(--gold); }
+}
+
+/* ---- modal overlays (scratch + help) ---- */
+.scratch, .help {
+  position: fixed; inset: 0; display: none;
+  align-items: center; justify-content: center;
+  background: rgba(4,20,15,.74); backdrop-filter: blur(3px); z-index: 1000;
+}
+.scratch.show, .help.show { display: flex; animation: fade .3s ease; }
+.scratch-card, .help-card {
+  position: relative; background: var(--bg); border: 2px solid var(--line);
+  border-radius: 18px; padding: 22px; width: min(92vw, 380px); text-align: center;
+}
+.scratch-card h3, .help-card h3 { margin: 0 0 12px; }
+.modal-x {
+  position: absolute; top: 8px; right: 10px; padding: 4px;
+  background: transparent; border: none; color: var(--mint-dim); font-size: 1.1rem; cursor: pointer;
+}
+button:disabled { opacity: .45; cursor: default; }
+
+/* ---- scratch card ---- */
+.scratch-area {
+  position: relative; width: 100%; height: 140px;
+  border-radius: 12px; overflow: hidden; border: 1px solid var(--line);
+}
+.reveal {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 4px; padding: 8px; background: var(--bg2);
+}
+.rv-name { font-size: 1.3rem; font-weight: 800; color: var(--mint); }
+.rv-meta { font-size: .8rem; color: var(--mint-dim); }
+.rv-badge { margin-top: 4px; font-size: .78rem; font-weight: 700; color: #3a2c00; background: var(--gold); padding: 3px 8px; border-radius: 999px; }
+.foil { position: absolute; inset: 0; cursor: grab; touch-action: none; }
+.scratch-hint { font-size: .78rem; margin: 10px 0; min-height: 1em; }
+.scratch-actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; align-items: center; }
+.scratch-actions .pop-btn { margin: 0; }
+
+/* ---- help / what's new ---- */
+.help-tabs {
+  display: flex; gap: 6px; justify-content: center; margin-bottom: 14px;
+  background: var(--bg2); border: 1px solid var(--line); border-radius: 999px; padding: 3px;
+}
+.help-tab {
+  background: transparent; color: var(--mint-dim); border: none; border-radius: 999px;
+  padding: 7px 14px; font-weight: 700; font-size: .85rem; cursor: pointer;
+}
+.help-tab.active { background: var(--mint); color: #06281c; }
+.help-body { text-align: left; font-size: .85rem; line-height: 1.45; max-height: 60vh; overflow: auto; }
+.help-body p { margin: .2em 0 .6em; }
+.help-body ul { margin: .2em 0; padding-left: 1.2em; }
+.help-body li { margin: .35em 0; }
+.cl { margin-bottom: 10px; }
+.cl h4 { margin: .4em 0 .2em; color: var(--mint-dim); font-size: .82rem; }
+.cl.cur h4 { color: var(--gold); }
+.cl ul { margin: .1em 0; }

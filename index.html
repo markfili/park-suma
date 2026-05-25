@@ -19,6 +19,7 @@
 </head>
 <body>
   <header>
+    <button class="info-btn" id="infoBtn" title="Help & what's new" aria-label="Help">ℹ️</button>
     <h1>🌲 Zagreb Park-Šuma <span class="b">BINGO</span></h1>
 
     <div class="progress">
@@ -32,6 +33,7 @@
       </div>
       <div class="track"><div class="track-fill" id="trackFill"></div></div>
       <div class="hint muted" id="nearHint"></div>
+      <div class="hint goal-chip" id="goalChip" style="display:none"></div>
     </div>
 
     <div class="toggle" id="toggle">
@@ -45,13 +47,14 @@
       <div class="board" id="board"></div>
       <div class="controls">
         <button id="new">🔀 Nova kartica</button>
+        <button id="whereNext" class="ghost">🎟 Where next?</button>
         <button id="locate" class="ghost">📍 Locate me</button>
       </div>
     </section>
 
     <section id="mapView" class="view">
       <div id="map"></div>
-      <div class="legend muted">🟢 visited · ⚪ not yet · 🔵 you · tap a pin to check in</div>
+      <div class="legend muted">🟢 visited · ⚪ not yet · 🟡 goal · 🔵 you · tap a pin to check in</div>
     </section>
   </main>
 
@@ -60,9 +63,10 @@
   <footer>
     24 zaštićenih park-šuma grada Zagreba · 🟢 greengo demo ·
     <span id="gpsStatus">GPS off — honor mode</span><br>
-    <span class="ver">v0.5.0 <span id="sha"></span></span>
+    <span class="ver"><span id="appVer">v0.6.0</span> <span id="sha"></span></span>
   </footer>
 
+  <!-- celebration banner (level up / bingo / sweep / destiny / champion) -->
   <div class="banner" id="banner">
     <div class="banner-card">
       <div class="banner-emoji" id="bEmoji">🎉</div>
@@ -72,9 +76,40 @@
     </div>
   </div>
 
+  <!-- scratch card -->
+  <div class="scratch" id="scratch">
+    <div class="scratch-card">
+      <button class="modal-x" id="scClose" aria-label="Close">✕</button>
+      <h3>🎟 Where to next?</h3>
+      <div class="scratch-area" id="scArea">
+        <div class="reveal" id="scReveal"></div>
+        <canvas class="foil" id="scFoil"></canvas>
+      </div>
+      <div class="scratch-hint muted" id="scHint">Scratch the foil to reveal your next park…</div>
+      <div class="scratch-actions">
+        <button id="scReroll" class="ghost">🔄 Re-roll</button>
+        <button id="scRevealBtn" class="ghost">Reveal</button>
+        <a id="scNav" class="pop-btn" href="#" target="_blank" rel="noopener" style="display:none">Navigate ↗</a>
+        <button id="scAccept" disabled>🎯 Accept</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- help / what's new -->
+  <div class="help" id="help">
+    <div class="help-card">
+      <button class="modal-x" id="helpX" aria-label="Close">✕</button>
+      <div class="help-tabs" id="helpTabs">
+        <button class="help-tab active" data-tab="howto">How to play</button>
+        <button class="help-tab" data-tab="news">What’s new</button>
+      </div>
+      <div class="help-body" id="helpBody"></div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
-  <!-- Leaflet library, then data, then app — all after the DOM exists. -->
+  <!-- Leaflet, then data, then app, then scratch — all after the DOM exists. -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
           crossorigin=""></script>
@@ -86,7 +121,7 @@
         s.onload = cb || null;
         document.body.appendChild(s);
       }
-      load('parks.js', function () { load('app.js'); });
+      load('parks.js', function () { load('app.js', function () { load('scratch.js'); }); });
     })();
   </script>
 </body>
