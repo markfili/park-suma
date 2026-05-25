@@ -162,6 +162,7 @@ button.ghost.on { background: var(--tile-marked); color: #06281c; border-color: 
 
 /* ---- footer ---- */
 footer { color: var(--mint-dim); font-size: .72rem; margin-top: 18px; text-align: center; opacity: .85; max-width: min(94vw,460px); }
+.ver { display: inline-block; margin-top: 4px; opacity: .7; font-variant-numeric: tabular-nums; letter-spacing: .3px; }
 
 /* ---- banner overlay ---- */
 .banner {
