@@ -19,6 +19,7 @@
 </head>
 <body>
   <header>
+    <button class="share-btn" id="shareBtn" title="Share your stats" aria-label="Share">📤</button>
     <button class="info-btn" id="infoBtn" title="Help & what's new" aria-label="Help">ℹ️</button>
     <h1>🌲 Zagreb Park-Šuma <span class="b">BINGO</span></h1>
 
@@ -64,7 +65,7 @@
   <footer>
     24 zaštićenih park-šuma grada Zagreba · 🟢 greengo demo ·
     <span id="gpsStatus">GPS off — honor mode</span><br>
-    <span class="ver"><span id="appVer">v0.7.0</span> <span id="sha"></span></span>
+    <span class="ver"><span id="appVer">v0.8.0</span> <span id="sha"></span></span>
   </footer>
 
   <!-- celebration banner (level up / bingo / sweep / destiny / champion) -->
@@ -108,6 +109,34 @@
     </div>
   </div>
 
+  <!-- share: compose your own -->
+  <div class="share" id="share">
+    <div class="share-card">
+      <button class="modal-x" id="shareX" aria-label="Close">✕</button>
+      <h3>📤 Share your stats</h3>
+      <label class="share-name">👤 <input id="shareName" placeholder="your name" maxlength="24" autocomplete="off"></label>
+      <div class="share-stats" id="shareStats"></div>
+      <canvas id="shareCanvas" width="600" height="315"></canvas>
+      <div class="share-actions">
+        <button id="shareCopy" class="ghost">🔗 Copy link</button>
+        <button id="shareNative" class="ghost">📤 Share</button>
+        <button id="shareImg">🖼 Save image</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- share: a stats link someone opened -->
+  <div class="share" id="shareView">
+    <div class="share-card">
+      <h3 id="svTitle">👤 forest stats</h3>
+      <div class="share-stats" id="svStats"></div>
+      <div class="sv-dots" id="svDots"></div>
+      <div class="share-actions">
+        <button id="svPlay">🌲 Play your own</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
   <!-- Leaflet, then data, then app, then scratch — all after the DOM exists. -->
@@ -122,7 +151,9 @@
         s.onload = cb || null;
         document.body.appendChild(s);
       }
-      load('parks.js', function () { load('app.js', function () { load('scratch.js'); }); });
+      load('parks.js', function () {
+        load('app.js', function () { load('scratch.js', function () { load('share.js'); }); });
+      });
     })();
   </script>
 </body>

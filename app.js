@@ -6,7 +6,7 @@ const FREE = 12;                          // center cell of the 5×5
 const STORAGE_KEY = "parkSumaBingo:v2";
 const SEEN_VERSION_KEY = "parkSumaBingo:seenVersion";
 const CHECKIN_M = 300;                     // GPS check-in radius (metres)
-const APP_VERSION = "0.7.0";               // single source of truth for the version
+const APP_VERSION = "0.8.0";               // single source of truth for the version
 
 // Level ladder — the headline progression (visit count -> tier).
 const TIERS = [
@@ -21,6 +21,10 @@ const TIERS = [
 
 // Changelog (newest first) — drives the "What's new" tab and update detection.
 const CHANGELOG = [
+  { v: "0.8.0", notes: [
+    "👤 Pick a username (saved on your device).",
+    "📤 Share your stats — as a link (progress packed into the URL) or a generated image card.",
+  ]},
   { v: "0.7.0", notes: [
     "♻️ Reset progress button — wipe visited parks, goal, and milestones for a clean slate.",
   ]},
@@ -108,11 +112,12 @@ function load(){
     }
     return {
       visited, order,
+      name: (typeof s.name === 'string') ? s.name : '',
       goal: (typeof s.goal === 'string' && set.has(s.goal)) ? s.goal : null,
       seenTiers: Array.isArray(s.seenTiers) ? s.seenTiers : [],
       seenDistricts: Array.isArray(s.seenDistricts) ? s.seenDistricts : [],
     };
-  } catch(e){ return { visited:{}, order:null, goal:null, seenTiers:[], seenDistricts:[] }; }
+  } catch(e){ return { visited:{}, order:null, name:'', goal:null, seenTiers:[], seenDistricts:[] }; }
 }
 function save(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){} }
 

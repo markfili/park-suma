@@ -193,13 +193,29 @@ footer { color: var(--mint-dim); font-size: .72rem; margin-top: 18px; text-align
 
 /* ---- info button ---- */
 header { position: relative; }
-.info-btn {
-  position: absolute; top: 0; right: 0;
+.info-btn, .share-btn {
+  position: absolute; top: 0;
   width: 34px; height: 34px; padding: 0; line-height: 1;
   background: transparent; color: var(--mint);
   border: 1px solid var(--line); border-radius: 50%;
   font-size: 1rem; cursor: pointer;
 }
+.info-btn { right: 0; }
+.share-btn { left: 0; }
+
+/* ---- share ---- */
+.share-card h3 { margin: 0 0 14px; }
+.share-name { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.share-name input {
+  font: inherit; background: var(--bg2); color: var(--mint);
+  border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; width: 180px;
+}
+.share-stats { font-size: .9rem; font-weight: 700; color: var(--gold); margin-bottom: 12px; }
+#shareCanvas { width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--line); display: block; }
+.share-actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 14px; }
+.sv-dots { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 14px 0 4px; }
+.sv-dot { width: 12px; height: 12px; border-radius: 50%; background: #274d3e; }
+.sv-dot.on { background: var(--tile-marked); }
 
 /* ---- goal ---- */
 .goal-chip { color: var(--gold); font-weight: 600; }
@@ -210,13 +226,13 @@ header { position: relative; }
 }
 
 /* ---- modal overlays (scratch + help) ---- */
-.scratch, .help {
+.scratch, .help, .share {
   position: fixed; inset: 0; display: none;
   align-items: center; justify-content: center;
   background: rgba(4,20,15,.74); backdrop-filter: blur(3px); z-index: 1000;
 }
-.scratch.show, .help.show { display: flex; animation: fade .3s ease; }
-.scratch-card, .help-card {
+.scratch.show, .help.show, .share.show { display: flex; animation: fade .3s ease; }
+.scratch-card, .help-card, .share-card {
   position: relative; background: var(--bg); border: 2px solid var(--line);
   border-radius: 18px; padding: 22px; width: min(92vw, 380px); text-align: center;
 }
