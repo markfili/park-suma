@@ -205,17 +205,16 @@ footer { color: var(--mint-dim); font-size: .72rem; margin-top: 18px; text-align
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* ---- info button ---- */
-header { position: relative; }
-.info-btn, .share-btn {
-  position: absolute; top: 0;
-  width: 34px; height: 34px; padding: 0; line-height: 1;
+/* ---- top bar (icon buttons flank the title) ---- */
+.topbar { display: flex; align-items: center; gap: 8px; }
+.topbar h1 { flex: 1; min-width: 0; }
+.iconbtn {
+  flex: 0 0 auto;
+  width: 36px; height: 36px; padding: 0; line-height: 1;
   background: transparent; color: var(--mint);
   border: 1px solid var(--line); border-radius: 50%;
   font-size: 1rem; cursor: pointer;
 }
-.info-btn { right: 0; }
-.share-btn { left: 0; }
 
 /* ---- share ---- */
 .share-card h3 { margin: 0 0 14px; }
