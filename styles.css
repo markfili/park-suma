@@ -125,6 +125,7 @@ button {
 button:active { transform: scale(.96); }
 button.ghost { background: transparent; color: var(--mint); border: 1px solid var(--line); }
 button.ghost.on { background: var(--tile-marked); color: #06281c; border-color: var(--tile-marked); }
+button.ghost.danger { color: #ff9b8a; border-color: #6e3b32; }
 
 /* ---- map ---- */
 #map {

@@ -6,7 +6,7 @@ const FREE = 12;                          // center cell of the 5×5
 const STORAGE_KEY = "parkSumaBingo:v2";
 const SEEN_VERSION_KEY = "parkSumaBingo:seenVersion";
 const CHECKIN_M = 300;                     // GPS check-in radius (metres)
-const APP_VERSION = "0.6.0";               // single source of truth for the version
+const APP_VERSION = "0.7.0";               // single source of truth for the version
 
 // Level ladder — the headline progression (visit count -> tier).
 const TIERS = [
@@ -21,6 +21,9 @@ const TIERS = [
 
 // Changelog (newest first) — drives the "What's new" tab and update detection.
 const CHANGELOG = [
+  { v: "0.7.0", notes: [
+    "♻️ Reset progress button — wipe visited parks, goal, and milestones for a clean slate.",
+  ]},
   { v: "0.6.0", notes: [
     "🎟 “Where to next?” scratch card — scratch to reveal a random unvisited park and set it as your 🎯 goal.",
     "ℹ️ This help dialog: How to play + What’s new (pops up automatically after an update).",
@@ -123,6 +126,14 @@ function pickNext(){ const pool = PARKS.filter(p => !isVisited(p.name)); return 
 function completesDistrict(name){
   const d = DISTRICTS.find(x => x.parks.includes(name));
   return !!(d && !isVisited(name) && d.parks.filter(isVisited).length === d.parks.length - 1);
+}
+function resetProgress(){
+  if (!confirm('Reset all progress?\n\nThis clears every visited park, your goal, and earned milestones. It cannot be undone.')) return;
+  state.visited = {}; state.goal = null; state.seenTiers = []; state.seenDistricts = [];
+  save();
+  buildCard(false);   // keep the card layout, just clear the marks
+  refreshAll();
+  toast('Progress reset 🌱');
 }
 function refreshGoal(){
   const chip = $('goalChip'); if (!chip) return;
@@ -392,6 +403,7 @@ function maybeShowWhatsNew(){
 $('toggle').addEventListener('click', e => { const s = e.target.closest('.seg'); if (s) showView(s.dataset.view); });
 $('new').addEventListener('click', () => { buildCard(true); refreshAll(); });
 $('locate').addEventListener('click', toggleGps);
+$('reset').addEventListener('click', resetProgress);
 $('bClose').addEventListener('click', showNextBanner);
 banner.addEventListener('click', e => { if (e.target === banner) showNextBanner(); });
 $('infoBtn').addEventListener('click', () => openHelp('howto'));
