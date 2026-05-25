@@ -12,19 +12,61 @@
 html, body { margin: 0; }
 body {
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  background: radial-gradient(120% 100% at 50% 0%, var(--bg) 0%, var(--bg2) 100%);
+  background: radial-gradient(120% 80% at 50% 0%, var(--bg) 0%, var(--bg2) 100%);
   color: var(--mint);
   min-height: 100vh;
   padding: env(safe-area-inset-top) 14px calc(env(safe-area-inset-bottom) + 24px);
   display: flex; flex-direction: column; align-items: center;
 }
-header { text-align: center; margin: 18px 0 6px; }
-h1 { font-size: clamp(1.5rem, 6vw, 2.2rem); margin: 0; letter-spacing: .5px; }
-h1 .b { color: var(--gold); }
-.sub { color: var(--mint-dim); font-size: .85rem; margin-top: 4px; }
+.muted { color: var(--mint-dim); }
 
+header { text-align: center; margin: 16px 0 6px; width: min(94vw, 460px); }
+h1 { font-size: clamp(1.35rem, 5.5vw, 2rem); margin: 0; letter-spacing: .5px; }
+h1 .b { color: var(--gold); }
+
+/* ---- progress / level ---- */
+.progress { margin-top: 12px; }
+.lvl { display: flex; align-items: center; gap: 10px; }
+.lvl-badge {
+  font-size: 1.6rem; width: 2.2rem; height: 2.2rem; flex: 0 0 auto;
+  display: grid; place-items: center;
+  background: var(--tile); border: 1px solid var(--line); border-radius: 50%;
+}
+.lvl-text { display: flex; flex-direction: column; text-align: left; line-height: 1.15; }
+.lvl-text strong { font-size: .95rem; }
+.lvl-text .muted { font-size: .72rem; }
+.lvl-count { margin-left: auto; font-weight: 700; font-size: .95rem; }
+.track {
+  height: 9px; background: var(--bg2); border: 1px solid var(--line);
+  border-radius: 999px; overflow: hidden; margin-top: 8px;
+}
+.track-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--tile-marked), var(--gold));
+  border-radius: 999px; transition: width .4s ease;
+}
+.hint { font-size: .75rem; margin-top: 6px; min-height: 1em; }
+
+/* ---- toggle ---- */
+.toggle {
+  display: inline-flex; margin-top: 14px;
+  background: var(--bg2); border: 1px solid var(--line); border-radius: 999px; padding: 3px;
+}
+.seg {
+  font: inherit; font-weight: 700; font-size: .9rem;
+  background: transparent; color: var(--mint-dim);
+  border: none; border-radius: 999px; padding: 7px 18px; cursor: pointer;
+}
+.seg.active { background: var(--mint); color: #06281c; }
+
+/* ---- views ---- */
+main { width: min(94vw, 460px); }
+.view { display: none; flex-direction: column; align-items: center; }
+.view.active { display: flex; }
+
+/* ---- board ---- */
 .board {
-  width: min(94vw, 460px);
+  width: 100%;
   aspect-ratio: 1 / 1;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -72,7 +114,8 @@ h1 .b { color: var(--gold); }
 }
 .pin:hover { opacity: 1; }
 
-.bar { display: flex; gap: 10px; align-items: center; margin-top: 4px; }
+/* ---- controls ---- */
+.controls { display: flex; gap: 10px; align-items: center; margin-top: 4px; flex-wrap: wrap; justify-content: center; }
 button {
   font: inherit; font-weight: 700;
   background: var(--mint); color: #06281c;
@@ -80,21 +123,68 @@ button {
   padding: 10px 18px; cursor: pointer;
 }
 button:active { transform: scale(.96); }
-.count { color: var(--mint-dim); font-size: .85rem; }
+button.ghost { background: transparent; color: var(--mint); border: 1px solid var(--line); }
+button.ghost.on { background: var(--tile-marked); color: #06281c; border-color: var(--tile-marked); }
 
+/* ---- map ---- */
+#map {
+  width: 100%;
+  height: min(64vh, 460px);
+  margin-top: 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  overflow: hidden;
+  background: var(--bg2);
+}
+.legend { font-size: .72rem; margin-top: 8px; text-align: center; }
+.leaflet-popup-content { margin: 10px 12px; font: inherit; }
+.leaflet-popup-content b { font-size: .95rem; }
+.pop-meta { color: #4a6b5c; font-size: .8rem; }
+.pop-btn {
+  display: inline-block; margin-top: 8px; font-size: .8rem; font-weight: 700;
+  background: #2fae6f; color: #06281c; border: none; border-radius: 999px;
+  padding: 6px 12px; cursor: pointer; text-decoration: none;
+}
+.pop-link { display: inline-block; margin-top: 8px; margin-left: 8px; font-size: .8rem; }
+
+/* ---- districts ---- */
+.districts {
+  width: min(94vw, 460px);
+  display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;
+  margin-top: 16px;
+}
+.chip {
+  font-size: .72rem; font-weight: 600;
+  background: var(--tile); border: 1px solid var(--line); color: var(--mint-dim);
+  border-radius: 999px; padding: 5px 10px; white-space: nowrap;
+}
+.chip.done { background: var(--gold); color: #3a2c00; border-color: var(--gold); }
+
+/* ---- footer ---- */
+footer { color: var(--mint-dim); font-size: .72rem; margin-top: 18px; text-align: center; opacity: .85; max-width: min(94vw,460px); }
+
+/* ---- banner overlay ---- */
 .banner {
   position: fixed; inset: 0; display: none;
   align-items: center; justify-content: center;
-  background: rgba(4,20,15,.72); backdrop-filter: blur(3px); z-index: 10;
+  background: rgba(4,20,15,.74); backdrop-filter: blur(3px); z-index: 1000;
 }
 .banner.show { display: flex; animation: fade .3s ease; }
 @keyframes fade { from{opacity:0} to{opacity:1} }
 .banner-card {
   background: var(--bg); border: 2px solid var(--gold); border-radius: 18px;
-  padding: 28px 30px; text-align: center; max-width: 80vw;
+  padding: 26px 30px; text-align: center; max-width: 82vw;
 }
-.banner-card h2 { color: var(--gold); font-size: 2.4rem; margin: 0 0 6px; }
-.banner-card p { color: var(--mint); margin: 0 0 18px; }
+.banner-emoji { font-size: 3rem; line-height: 1; }
+.banner-card h2 { color: var(--gold); font-size: 1.9rem; margin: 8px 0 6px; }
+.banner-card p { color: var(--mint); margin: 0 0 18px; font-size: .95rem; }
 
-footer { color: var(--mint-dim); font-size: .72rem; margin-top: 14px; text-align: center; opacity: .8; }
-footer a { color: var(--mint-dim); }
+/* ---- toast ---- */
+.toast {
+  position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%) translateY(20px);
+  background: #06281c; color: var(--mint); border: 1px solid var(--line);
+  padding: 10px 16px; border-radius: 999px; font-size: .82rem; font-weight: 600;
+  opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .25s ease;
+  z-index: 1100; max-width: 86vw; text-align: center;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }

@@ -4,12 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Zagreb Park-Šuma Bingo</title>
+
+<!-- Leaflet (map). Loaded from CDN with Subresource Integrity. -->
+<link rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin="">
+
 <script>
-  // Cache-busting: a fresh version token per page load. Because the value
-  // changes every load, the browser (and the GitHub Pages CDN) can never
-  // serve a stale styles.css / app.js — your edits show on a plain refresh.
-  // Want normal caching back later? Replace Date.now() with a fixed string
-  // like "1.0.0" and bump it when you ship.
+  // Cache-busting: fresh token per load so edits always show on refresh.
   window.__V = Date.now();
   document.write('<link rel="stylesheet" href="styles.css?v=' + window.__V + '">');
 </script>
@@ -17,34 +20,72 @@
 <body>
   <header>
     <h1>🌲 Zagreb Park-Šuma <span class="b">BINGO</span></h1>
-    <div class="sub">Tap a forest park you've visited · 5 in a row wins</div>
+
+    <div class="progress">
+      <div class="lvl">
+        <span class="lvl-badge" id="lvlBadge">🌱</span>
+        <div class="lvl-text">
+          <strong id="lvlName">Seedling</strong>
+          <span class="muted" id="lvlNext">Next: 5 → Sprout</span>
+        </div>
+        <span class="lvl-count" id="count">0 / 24</span>
+      </div>
+      <div class="track"><div class="track-fill" id="trackFill"></div></div>
+      <div class="hint muted" id="nearHint"></div>
+    </div>
+
+    <div class="toggle" id="toggle">
+      <button class="seg active" data-view="card">🎲 Card</button>
+      <button class="seg" data-view="map">🗺 Map</button>
+    </div>
   </header>
 
-  <div class="board" id="board"></div>
+  <main>
+    <section id="cardView" class="view active">
+      <div class="board" id="board"></div>
+      <div class="controls">
+        <button id="new">🔀 Nova kartica</button>
+        <button id="locate" class="ghost">📍 Locate me</button>
+      </div>
+    </section>
 
-  <div class="bar">
-    <button id="new">🔀 Nova kartica</button>
-    <span class="count" id="count">0 / 24</span>
-  </div>
+    <section id="mapView" class="view">
+      <div id="map"></div>
+      <div class="legend muted">🟢 visited · ⚪ not yet · 🔵 you · tap a pin to check in</div>
+    </section>
+  </main>
+
+  <section class="districts" id="districts"></section>
 
   <footer>
-    24 zaštićenih park-šuma grada Zagreba · 🟢 greengo demo
+    24 zaštićenih park-šuma grada Zagreba · 🟢 greengo demo ·
+    <span id="gpsStatus">GPS off — honor mode</span>
   </footer>
 
   <div class="banner" id="banner">
     <div class="banner-card">
-      <h2>🎉 BINGO!</h2>
-      <p id="banner-msg">You linked up 5 forest parks!</p>
-      <button id="again">Nova kartica</button>
+      <div class="banner-emoji" id="bEmoji">🎉</div>
+      <h2 id="bTitle">BINGO!</h2>
+      <p id="bMsg"></p>
+      <button id="bClose">Nice!</button>
     </div>
   </div>
 
+  <div class="toast" id="toast"></div>
+
+  <!-- Leaflet library, then data, then app — all after the DOM exists. -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+          crossorigin=""></script>
   <script>
-    // Load the game logic with the same cache-busting token.
     (function () {
-      var s = document.createElement('script');
-      s.src = 'app.js?v=' + window.__V;
-      document.body.appendChild(s);
+      function load(src, cb) {
+        var s = document.createElement('script');
+        s.src = src + '?v=' + window.__V;
+        s.onload = cb || null;
+        document.body.appendChild(s);
+      }
+      load('parks.js', function () { load('app.js'); });
     })();
   </script>
 </body>
