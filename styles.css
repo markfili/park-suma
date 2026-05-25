@@ -47,6 +47,17 @@ h1 .b { color: var(--gold); }
 }
 .hint { font-size: .75rem; margin-top: 6px; min-height: 1em; }
 
+/* level mode toggle (count vs size) */
+.mode-toggle {
+  display: inline-flex; margin-top: 8px;
+  background: var(--bg2); border: 1px solid var(--line); border-radius: 999px; padding: 2px;
+}
+.modeseg {
+  background: transparent; color: var(--mint-dim); border: none; border-radius: 999px;
+  padding: 4px 12px; font-weight: 700; font-size: .72rem; cursor: pointer;
+}
+.modeseg.active { background: var(--mint); color: #06281c; }
+
 /* ---- toggle ---- */
 .toggle {
   display: inline-flex; margin-top: 14px;

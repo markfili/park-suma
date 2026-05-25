@@ -6,7 +6,7 @@ const FREE = 12;                          // center cell of the 5×5
 const STORAGE_KEY = "parkSumaBingo:v2";
 const SEEN_VERSION_KEY = "parkSumaBingo:seenVersion";
 const CHECKIN_M = 300;                     // GPS check-in radius (metres)
-const APP_VERSION = "0.9.0";               // single source of truth for the version
+const APP_VERSION = "0.10.0";              // single source of truth for the version
 
 // Level ladder — the headline progression (visit count -> tier).
 const TIERS = [
@@ -21,6 +21,10 @@ const TIERS = [
 
 // Changelog (newest first) — drives the "What's new" tab and update detection.
 const CHANGELOG = [
+  { v: "0.10.0", notes: [
+    "🗺️ Park boundary polygons on the map (from OpenStreetMap) + each park’s size in hectares.",
+    "🌳 Hectares-explored stat, and a “By size” progression mode where bigger parks weigh more toward your level.",
+  ]},
   { v: "0.9.0", notes: [
     "🚲 Toggleable nextbike layer on the map — live station badges with bike counts.",
     "Stations near unvisited parks are highlighted, and the nearest bikes to your goal are shown.",
@@ -101,6 +105,21 @@ function haversine(aLat, aLon, bLat, bLon){
   return 2*R*Math.asin(Math.sqrt(s));
 }
 
+// ---- area (hectares) ----
+const TOTAL_HA = PARKS.reduce((s, p) => s + (p.ha || 0), 0);
+function haOf(name){ return BY_NAME[name].ha || 0; }
+function haExplored(){ return NAMES.reduce((s, n) => s + (isVisited(n) ? haOf(n) : 0), 0); }
+
+// Size-weighted level ladder: same tier names, thresholds in hectares.
+// Bigger parks push you up faster — that's the "weight" on earned badges.
+const AREA_FRACS = [0, 0.03, 0.15, 0.33, 0.55, 0.8, 1];
+const AREA_TIERS = TIERS.map((t, i) => ({ n: Math.round(AREA_FRACS[i] * TOTAL_HA), name: t.name, emoji: t.emoji }));
+
+function ladder(){ return state.mode === 'area' ? AREA_TIERS : TIERS; }
+function progressValue(){ return state.mode === 'area' ? Math.round(haExplored()) : visitedCount(); }
+function tierForVal(v, tiers){ let t = tiers[0]; for (const x of tiers) if (v >= x.n) t = x; return t; }
+function nextForVal(v, tiers){ return tiers.find(x => x.n > v) || null; }
+
 // ---- persistence (v2) ----
 function load(){
   try {
@@ -117,11 +136,13 @@ function load(){
     return {
       visited, order,
       name: (typeof s.name === 'string') ? s.name : '',
+      mode: (s.mode === 'area') ? 'area' : 'count',
       goal: (typeof s.goal === 'string' && set.has(s.goal)) ? s.goal : null,
       seenTiers: Array.isArray(s.seenTiers) ? s.seenTiers : [],
+      seenAreaTiers: Array.isArray(s.seenAreaTiers) ? s.seenAreaTiers : [],
       seenDistricts: Array.isArray(s.seenDistricts) ? s.seenDistricts : [],
     };
-  } catch(e){ return { visited:{}, order:null, name:'', goal:null, seenTiers:[], seenDistricts:[] }; }
+  } catch(e){ return { visited:{}, order:null, name:'', mode:'count', goal:null, seenTiers:[], seenAreaTiers:[], seenDistricts:[] }; }
 }
 function save(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){} }
 
@@ -250,13 +271,23 @@ function celebrate(name){
     state.seenDistricts.push(dName); save();
     queueBanner("🗺️", "District swept!", `You've visited every park-šuma in ${dName}.`);
   }
-  // level up (1/5/10/15/20); champion (24) as the finale
-  TIERS.filter(t => t.n >= 1 && t.n < 24).forEach(t => {
+  // level up — award BOTH ladders (count + size); banner only for the active mode
+  const ha = Math.round(haExplored());
+  TIERS.forEach((t, i) => {
+    if (i === 0 || i === TIERS.length - 1) return;          // skip Newcomer + Champion
     if (count >= t.n && !state.seenTiers.includes(t.n)) {
-      state.seenTiers.push(t.n); save();
-      queueBanner(t.emoji, `Level up: ${t.name}!`, `${count} of 24 parks visited.`);
+      state.seenTiers.push(t.n);
+      if (state.mode === 'count') queueBanner(t.emoji, `Level up: ${t.name}!`, `${count} of 24 parks visited.`);
     }
   });
+  AREA_TIERS.forEach((t, i) => {
+    if (i === 0 || i === AREA_TIERS.length - 1) return;
+    if (ha >= t.n && !state.seenAreaTiers.includes(t.n)) {
+      state.seenAreaTiers.push(t.n);
+      if (state.mode === 'area') queueBanner(t.emoji, `Level up: ${t.name}!`, `${ha} ha explored.`);
+    }
+  });
+  save();
   if (count === 24 && !state.seenTiers.includes(24)) {
     state.seenTiers.push(24); save();
     queueBanner("🏆", "Forest Champion!", "All 24 park-šume of Zagreb visited. Bravo! 🌲");
@@ -266,12 +297,17 @@ function celebrate(name){
 
 // ---- progress / districts UI ----
 function refreshProgress(){
-  const count = visitedCount(), tier = tierFor(count), next = nextTier(count);
+  const count = visitedCount();
+  const tiers = ladder(), val = progressValue();
+  const tier = tierForVal(val, tiers), next = nextForVal(val, tiers);
   lvlBadge.textContent = tier.emoji;
   lvlName.textContent = tier.name;
   countEl.textContent = count + " / 24";
-  lvlNext.textContent = next ? `Next: ${next.n} → ${next.name}` : "Max level reached! 🏆";
-  const pct = next ? (count - tier.n) / (next.n - tier.n) * 100 : 100;
+  const hs = $('haStat');
+  if (hs) hs.textContent = Math.round(haExplored()) + " / " + Math.round(TOTAL_HA) + " ha explored";
+  const unit = state.mode === 'area' ? ' ha' : '';
+  lvlNext.textContent = next ? `Next: ${next.n}${unit} → ${next.name}` : "Max level reached! 🏆";
+  const pct = next ? (val - tier.n) / (next.n - tier.n) * 100 : 100;
   trackFill.style.width = Math.max(0, Math.min(100, pct)) + "%";
 }
 function refreshDistricts(){
@@ -295,13 +331,19 @@ function refreshNearest(){
 function refreshAll(){ refreshCardCells(); refreshMapStyles(); refreshProgress(); refreshDistricts(); refreshNearest(); refreshGoal(); }
 
 // ---- map view ----
-let map = null, markers = {}, userMarker = null, mapReady = false;
+let map = null, markers = {}, userMarker = null, mapReady = false, parkPolys = null;
 function initMap(){
   if (mapReady || typeof L === 'undefined') return;
   map = L.map('map', { zoomControl: true });
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19, attribution: '&copy; OpenStreetMap contributors'
   }).addTo(map);
+  // park boundary polygons (own pane, below the pins; non-interactive so pins keep clicks)
+  map.createPane('parks'); map.getPane('parks').style.zIndex = 350;
+  fetch('parks.geojson?v=' + (window.__V || ''))
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(geo => { parkPolys = L.geoJSON(geo, { pane: 'parks', interactive: false, style: f => polyStyle(f.properties.name) }).addTo(map); })
+    .catch(() => {});
   const pts = [];
   PARKS.forEach(p => {
     const m = L.circleMarker([p.lat, p.lon], markerStyle(p.name)).addTo(map);
@@ -322,19 +364,29 @@ function markerStyle(name){
     fillColor: on ? '#2fae6f' : (goal ? '#caa23a' : '#3a5d4d'),
     fillOpacity: 0.95 };
 }
+function polyStyle(name){
+  const on = isVisited(name), goal = !on && name === state.goal;
+  return { weight: goal ? 3 : 1.5, color: goal ? '#ffd56b' : (on ? '#2fae6f' : '#5a8f78'),
+    fillColor: on ? '#2fae6f' : '#3a5d4d', fillOpacity: on ? 0.45 : 0.18 };
+}
 function popupHtml(p){
   const on = isVisited(p.name);
   let dist = '';
   if (gpsActive && userPos) dist = ` · ${fmtDist(haversine(userPos.lat, userPos.lon, p.lat, p.lon))} away`;
   const status = on ? `✅ visited ${state.visited[p.name]}` : (p.name === state.goal ? '🎯 your goal' : 'not visited yet');
   const approx = p.approx ? ' <span class="pop-meta">(approx. location)</span>' : '';
+  const size = p.ha ? ' · ' + p.ha + ' ha' : '';
   const btn = `<button class="pop-btn" onclick="attemptCheckin('${p.name.replace(/'/g, "\\'")}')">${on ? 'Un-check' : 'Check in'}</button>`;
   const link = `<a class="pop-link" href="${mapsLink(p.name)}" target="_blank" rel="noopener">Maps ↗</a>`;
-  return `<b>${p.name}</b>${approx}<br><span class="pop-meta">${p.district} · ${status}${dist}</span><br>${btn}${link}`;
+  return `<b>${p.name}</b>${approx}<br><span class="pop-meta">${p.district}${size} · ${status}${dist}</span><br>${btn}${link}`;
 }
 function refreshMapStyles(){
   if (!mapReady) return;
   PARKS.forEach(p => { if (markers[p.name]) markers[p.name].setStyle(markerStyle(p.name)); });
+  if (parkPolys) parkPolys.eachLayer(l => {
+    const nm = l.feature && l.feature.properties && l.feature.properties.name;
+    if (nm) l.setStyle(polyStyle(nm));
+  });
   if (userMarker && userPos) userMarker.setLatLng([userPos.lat, userPos.lon]);
 }
 
@@ -414,6 +466,12 @@ $('toggle').addEventListener('click', e => { const s = e.target.closest('.seg');
 $('new').addEventListener('click', () => { buildCard(true); refreshAll(); });
 $('locate').addEventListener('click', toggleGps);
 $('reset').addEventListener('click', resetProgress);
+$('modeToggle').addEventListener('click', e => {
+  const b = e.target.closest('.modeseg'); if (!b) return;
+  state.mode = b.dataset.mode; save();
+  document.querySelectorAll('.modeseg').forEach(s => s.classList.toggle('active', s.dataset.mode === state.mode));
+  refreshProgress();
+});
 $('bClose').addEventListener('click', showNextBanner);
 banner.addEventListener('click', e => { if (e.target === banner) showNextBanner(); });
 $('infoBtn').addEventListener('click', () => openHelp('howto'));
@@ -425,6 +483,7 @@ $('helpTabs').addEventListener('click', e => { const t = e.target.closest('.help
 buildCard(false);
 setGpsStatus();
 refreshAll();
+document.querySelectorAll('.modeseg').forEach(s => s.classList.toggle('active', s.dataset.mode === state.mode));
 $('appVer').textContent = 'v' + APP_VERSION;
 maybeShowWhatsNew();
 

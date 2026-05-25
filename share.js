@@ -31,7 +31,8 @@
   function stats(set) {
     const count = set.size, tier = tierFor(count);
     const swept = DISTRICTS.filter(d => d.parks.every(p => set.has(p))).length;
-    return { count, tier, swept };
+    const ha = Math.round([...set].reduce((s, n) => s + ((BY_NAME[n] && BY_NAME[n].ha) || 0), 0));
+    return { count, tier, swept, ha };
   }
 
   // ---- stats image (canvas) ----
@@ -51,7 +52,7 @@
     x.fillStyle = '#ffd56b'; x.font = 'bold 72px system-ui, sans-serif';
     x.fillText(st.count + ' / 24', W / 2, 168);
     x.fillStyle = '#7fcfa3'; x.font = '18px system-ui, sans-serif';
-    x.fillText(st.swept + ' of ' + DISTRICTS.length + ' districts swept', W / 2, 200);
+    x.fillText(st.swept + ' districts swept · ' + st.ha + ' ha explored', W / 2, 200);
 
     // 24 dots (visited = green)
     const cols = 12, r = 9, gap = 30, startX = W / 2 - (cols - 1) * gap / 2, startY = 240;
@@ -74,7 +75,7 @@
   function refreshCompose() {
     const set = new Set(NAMES.filter(isVisited));
     const st = stats(set);
-    statsEl.textContent = `${st.count} / 24 · ${st.tier.emoji} ${st.tier.name} · ${st.swept} districts swept`;
+    statsEl.textContent = `${st.count} / 24 · ${st.tier.emoji} ${st.tier.name} · ${st.swept} districts · ${st.ha} ha`;
     drawCard(canvas, (state.name || '').trim(), set);
   }
   function openCompose() {
@@ -122,7 +123,7 @@
     const st = stats(set), sv = document.getElementById('shareView');
     document.getElementById('svTitle').textContent = '👤 ' + (name || 'A forester') + '’s forest stats';
     document.getElementById('svStats').textContent =
-      `${st.count} / 24 · ${st.tier.emoji} ${st.tier.name} · ${st.swept} of ${DISTRICTS.length} districts swept`;
+      `${st.count} / 24 · ${st.tier.emoji} ${st.tier.name} · ${st.swept} districts · ${st.ha} ha`;
     const dots = document.getElementById('svDots');
     dots.innerHTML = '';
     NAMES.forEach(n => {

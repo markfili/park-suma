@@ -35,6 +35,11 @@
         <span class="lvl-count" id="count">0 / 24</span>
       </div>
       <div class="track"><div class="track-fill" id="trackFill"></div></div>
+      <div class="mode-toggle" id="modeToggle">
+        <button class="modeseg active" data-mode="count">By count</button>
+        <button class="modeseg" data-mode="area">By size</button>
+      </div>
+      <div class="hint muted" id="haStat"></div>
       <div class="hint muted" id="nearHint"></div>
       <div class="hint goal-chip" id="goalChip" style="display:none"></div>
     </div>
@@ -69,7 +74,7 @@
   <footer>
     24 zaštićenih park-šuma grada Zagreba · 🟢 greengo demo ·
     <span id="gpsStatus">GPS off — honor mode</span><br>
-    <span class="ver"><span id="appVer">v0.9.0</span> <span id="sha"></span></span>
+    <span class="ver"><span id="appVer">v0.10.0</span> <span id="sha"></span></span>
   </footer>
 
   <!-- celebration banner (level up / bingo / sweep / destiny / champion) -->
