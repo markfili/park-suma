@@ -6,7 +6,7 @@ const FREE = 12;                          // center cell of the 5×5
 const STORAGE_KEY = "parkSumaBingo:v2";
 const SEEN_VERSION_KEY = "parkSumaBingo:seenVersion";
 const CHECKIN_M = 300;                     // GPS check-in radius (metres)
-const APP_VERSION = "0.8.0";               // single source of truth for the version
+const APP_VERSION = "0.9.0";               // single source of truth for the version
 
 // Level ladder — the headline progression (visit count -> tier).
 const TIERS = [
@@ -21,6 +21,10 @@ const TIERS = [
 
 // Changelog (newest first) — drives the "What's new" tab and update detection.
 const CHANGELOG = [
+  { v: "0.9.0", notes: [
+    "🚲 Toggleable nextbike layer on the map — live station badges with bike counts.",
+    "Stations near unvisited parks are highlighted, and the nearest bikes to your goal are shown.",
+  ]},
   { v: "0.8.0", notes: [
     "👤 Pick a username (saved on your device).",
     "📤 Share your stats — as a link (progress packed into the URL) or a generated image card.",
@@ -148,6 +152,7 @@ function refreshGoal(){
     if (gpsActive && userPos) { const p = BY_NAME[g]; txt += ' (' + fmtDist(haversine(userPos.lat, userPos.lon, p.lat, p.lon)) + ')'; }
     chip.textContent = txt; chip.style.display = '';
   } else { chip.textContent = ''; chip.style.display = 'none'; }
+  if (window.bikesGoalUpdate) window.bikesGoalUpdate();   // keep the bikes tie-in in sync
 }
 
 // ---- board (card view) ----

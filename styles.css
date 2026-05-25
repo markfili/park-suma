@@ -138,6 +138,20 @@ button.ghost.danger { color: #ff9b8a; border-color: #6e3b32; }
   background: var(--bg2);
 }
 .legend { font-size: .72rem; margin-top: 8px; text-align: center; }
+#bikesToggle { margin-top: 10px; }
+.bikes-hint { font-size: .74rem; margin-top: 8px; text-align: center; min-height: 1em; color: var(--gold); }
+
+/* nextbike station badges (Leaflet divIcon) */
+.bike-badge {
+  position: relative; transform: translate(-50%, -50%);
+  display: inline-block; white-space: nowrap;
+  font: 700 11px/1 system-ui, sans-serif;
+  background: var(--tile-marked); color: #06281c;
+  border: 1px solid #eafff3; border-radius: 999px;
+  padding: 3px 6px; box-shadow: 0 1px 4px rgba(0,0,0,.4);
+}
+.bike-badge.empty { background: #6b8f7f; color: #0a2c22; border-color: #b8f5d0; }
+.bike-badge.near  { box-shadow: 0 0 0 2px var(--gold), 0 1px 4px rgba(0,0,0,.4); }
 .leaflet-popup-content { margin: 10px 12px; font: inherit; }
 .leaflet-popup-content b { font-size: .95rem; }
 .pop-meta { color: #4a6b5c; font-size: .8rem; }

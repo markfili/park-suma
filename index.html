@@ -57,6 +57,8 @@
     <section id="mapView" class="view">
       <div id="map"></div>
       <div class="legend muted">🟢 visited · ⚪ not yet · 🟡 goal · 🔵 you · tap a pin to check in</div>
+      <button id="bikesToggle" class="ghost">🚲 Show bikes</button>
+      <div class="bikes-hint muted" id="bikesHint"></div>
     </section>
   </main>
 
@@ -65,7 +67,7 @@
   <footer>
     24 zaštićenih park-šuma grada Zagreba · 🟢 greengo demo ·
     <span id="gpsStatus">GPS off — honor mode</span><br>
-    <span class="ver"><span id="appVer">v0.8.0</span> <span id="sha"></span></span>
+    <span class="ver"><span id="appVer">v0.9.0</span> <span id="sha"></span></span>
   </footer>
 
   <!-- celebration banner (level up / bingo / sweep / destiny / champion) -->
@@ -152,7 +154,9 @@
         document.body.appendChild(s);
       }
       load('parks.js', function () {
-        load('app.js', function () { load('scratch.js', function () { load('share.js'); }); });
+        load('app.js', function () {
+          load('scratch.js', function () { load('share.js', function () { load('bikes.js'); }); });
+        });
       });
     })();
   </script>
