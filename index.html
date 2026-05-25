@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Zagreb Park-Šuma Bingo</title>
+<script>
+  // Cache-busting: a fresh version token per page load. Because the value
+  // changes every load, the browser (and the GitHub Pages CDN) can never
+  // serve a stale styles.css / app.js — your edits show on a plain refresh.
+  // Want normal caching back later? Replace Date.now() with a fixed string
+  // like "1.0.0" and bump it when you ship.
+  window.__V = Date.now();
+  document.write('<link rel="stylesheet" href="styles.css?v=' + window.__V + '">');
+</script>
+</head>
+<body>
+  <header>
+    <h1>🌲 Zagreb Park-Šuma <span class="b">BINGO</span></h1>
+    <div class="sub">Tap a forest park you've visited · 5 in a row wins</div>
+  </header>
+
+  <div class="board" id="board"></div>
+
+  <div class="bar">
+    <button id="new">🔀 Nova kartica</button>
+    <span class="count" id="count">0 / 24</span>
+  </div>
+
+  <footer>
+    24 zaštićenih park-šuma grada Zagreba · 🟢 greengo demo
+  </footer>
+
+  <div class="banner" id="banner">
+    <div class="banner-card">
+      <h2>🎉 BINGO!</h2>
+      <p id="banner-msg">You linked up 5 forest parks!</p>
+      <button id="again">Nova kartica</button>
+    </div>
+  </div>
+
+  <script>
+    // Load the game logic with the same cache-busting token.
+    (function () {
+      var s = document.createElement('script');
+      s.src = 'app.js?v=' + window.__V;
+      document.body.appendChild(s);
+    })();
+  </script>
+</body>
+</html>
