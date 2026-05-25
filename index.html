@@ -20,24 +20,24 @@
 <body>
   <header>
     <div class="topbar">
-      <button class="iconbtn" id="shareBtn" title="Share your stats" aria-label="Share">📤</button>
+      <button class="iconbtn" id="shareBtn" data-i18n-title="title.share" data-i18n-aria="title.share">📤</button>
       <h1>🌲 Park-Šuma <span class="b">Bingo</span></h1>
-      <button class="iconbtn" id="infoBtn" title="Help & what's new" aria-label="Help">ℹ️</button>
+      <button class="iconbtn" id="infoBtn" data-i18n-title="title.help" data-i18n-aria="title.help">ℹ️</button>
     </div>
 
     <div class="progress">
       <div class="lvl">
         <span class="lvl-badge" id="lvlBadge">🌱</span>
         <div class="lvl-text">
-          <strong id="lvlName">Seedling</strong>
-          <span class="muted" id="lvlNext">Next: 5 → Sprout</span>
+          <strong id="lvlName">Klica</strong>
+          <span class="muted" id="lvlNext"></span>
         </div>
         <span class="lvl-count" id="count">0 / 24</span>
       </div>
       <div class="track"><div class="track-fill" id="trackFill"></div></div>
       <div class="mode-toggle" id="modeToggle">
-        <button class="modeseg active" data-mode="count">By count</button>
-        <button class="modeseg" data-mode="area">By size</button>
+        <button class="modeseg active" data-mode="count" data-i18n="mode.count">Po broju</button>
+        <button class="modeseg" data-mode="area" data-i18n="mode.size">Po veličini</button>
       </div>
       <div class="hint muted" id="haStat"></div>
       <div class="hint muted" id="nearHint"></div>
@@ -45,8 +45,8 @@
     </div>
 
     <div class="toggle" id="toggle">
-      <button class="seg active" data-view="card">🎲 Card</button>
-      <button class="seg" data-view="map">🗺 Map</button>
+      <button class="seg active" data-view="card" data-i18n="toggle.card">🎲 Kartica</button>
+      <button class="seg" data-view="map" data-i18n="toggle.map">🗺 Karta</button>
     </div>
   </header>
 
@@ -54,17 +54,17 @@
     <section id="cardView" class="view active">
       <div class="board" id="board"></div>
       <div class="controls">
-        <button id="new">🔀 Nova kartica</button>
-        <button id="whereNext" class="ghost">🎟 Where next?</button>
-        <button id="locate" class="ghost">📍 Locate me</button>
-        <button id="reset" class="ghost danger">♻️ Reset</button>
+        <button id="new" data-i18n="btn.newCard">🔀 Nova kartica</button>
+        <button id="whereNext" class="ghost" data-i18n="btn.whereNext">🎟 Kamo dalje?</button>
+        <button id="locate" class="ghost" data-i18n="btn.locate">📍 Lociraj me</button>
+        <button id="reset" class="ghost danger" data-i18n="btn.reset">♻️ Poništi</button>
       </div>
     </section>
 
     <section id="mapView" class="view">
       <div id="map"></div>
-      <div class="legend muted">🟢 visited · ⚪ not yet · 🟡 goal · 🔵 you · tap a pin to check in</div>
-      <button id="bikesToggle" class="ghost">🚲 Show bikes</button>
+      <div class="legend muted" data-i18n="legend">🟢 posjećeno · ⚪ još ne · 🟡 cilj · 🔵 ti · dodirni oznaku za prijavu</div>
+      <button id="bikesToggle" class="ghost" data-i18n="bikes.show">🚲 Prikaži bicikle</button>
       <div class="bikes-hint muted" id="bikesHint"></div>
     </section>
   </main>
@@ -72,36 +72,37 @@
   <section class="districts" id="districts"></section>
 
   <footer>
-    24 zaštićenih park-šuma grada Zagreba · 🟢 greengo demo ·
-    <span id="gpsStatus">GPS off — honor mode</span><br>
-    <span class="ver"><span id="appVer">v0.10.0</span> <span id="sha"></span></span>
+    <span data-i18n="footer.tagline">24 zaštićene park-šume grada Zagreba</span> · 🟢 greengo demo ·
+    <span id="gpsStatus"></span><br>
+    <span class="ver"><span id="appVer">v0.11.0</span> <span id="sha"></span></span>
+    <span class="lang" id="langToggle"><button data-lang="hr">HR</button><button data-lang="en">EN</button></span>
   </footer>
 
-  <!-- celebration banner (level up / bingo / sweep / destiny / champion) -->
+  <!-- celebration banner -->
   <div class="banner" id="banner">
     <div class="banner-card">
       <div class="banner-emoji" id="bEmoji">🎉</div>
       <h2 id="bTitle">BINGO!</h2>
       <p id="bMsg"></p>
-      <button id="bClose">Nice!</button>
+      <button id="bClose" data-i18n="banner.close">Super!</button>
     </div>
   </div>
 
   <!-- scratch card -->
   <div class="scratch" id="scratch">
     <div class="scratch-card">
-      <button class="modal-x" id="scClose" aria-label="Close">✕</button>
-      <h3>🎟 Where to next?</h3>
+      <button class="modal-x" id="scClose" aria-label="✕">✕</button>
+      <h3 data-i18n="scratch.title">🎟 Kamo dalje?</h3>
       <div class="scratch-area" id="scArea">
         <div class="reveal" id="scReveal"></div>
         <canvas class="foil" id="scFoil"></canvas>
       </div>
-      <div class="scratch-hint muted" id="scHint">Scratch the foil to reveal your next park…</div>
+      <div class="scratch-hint muted" id="scHint" data-i18n="scratch.hintStart">Grebi foliju da otkriješ sljedeći park…</div>
       <div class="scratch-actions">
-        <button id="scReroll" class="ghost">🔄 Re-roll</button>
-        <button id="scRevealBtn" class="ghost">Reveal</button>
-        <a id="scNav" class="pop-btn" href="#" target="_blank" rel="noopener" style="display:none">Navigate ↗</a>
-        <button id="scAccept" disabled>🎯 Accept</button>
+        <button id="scReroll" class="ghost" data-i18n="scratch.reroll">🔄 Ponovi</button>
+        <button id="scRevealBtn" class="ghost" data-i18n="scratch.reveal">Otkrij</button>
+        <a id="scNav" class="pop-btn" href="#" target="_blank" rel="noopener" style="display:none" data-i18n="scratch.nav">Navigacija ↗</a>
+        <button id="scAccept" disabled data-i18n="scratch.accept">🎯 Prihvati</button>
       </div>
     </div>
   </div>
@@ -109,10 +110,10 @@
   <!-- help / what's new -->
   <div class="help" id="help">
     <div class="help-card">
-      <button class="modal-x" id="helpX" aria-label="Close">✕</button>
+      <button class="modal-x" id="helpX" aria-label="✕">✕</button>
       <div class="help-tabs" id="helpTabs">
-        <button class="help-tab active" data-tab="howto">How to play</button>
-        <button class="help-tab" data-tab="news">What’s new</button>
+        <button class="help-tab active" data-tab="howto" data-i18n="help.howto">Kako igrati</button>
+        <button class="help-tab" data-tab="news" data-i18n="help.news">Novosti</button>
       </div>
       <div class="help-body" id="helpBody"></div>
     </div>
@@ -121,15 +122,15 @@
   <!-- share: compose your own -->
   <div class="share" id="share">
     <div class="share-card">
-      <button class="modal-x" id="shareX" aria-label="Close">✕</button>
-      <h3>📤 Share your stats</h3>
-      <label class="share-name">👤 <input id="shareName" placeholder="your name" maxlength="24" autocomplete="off"></label>
+      <button class="modal-x" id="shareX" aria-label="✕">✕</button>
+      <h3 data-i18n="share.title">📤 Podijeli statistiku</h3>
+      <label class="share-name">👤 <input id="shareName" data-i18n-ph="share.namePh" placeholder="tvoje ime" maxlength="24" autocomplete="off"></label>
       <div class="share-stats" id="shareStats"></div>
       <canvas id="shareCanvas" width="600" height="315"></canvas>
       <div class="share-actions">
-        <button id="shareCopy" class="ghost">🔗 Copy link</button>
-        <button id="shareNative" class="ghost">📤 Share</button>
-        <button id="shareImg">🖼 Save image</button>
+        <button id="shareCopy" class="ghost" data-i18n="share.copy">🔗 Kopiraj link</button>
+        <button id="shareNative" class="ghost" data-i18n="share.share">📤 Podijeli</button>
+        <button id="shareImg" data-i18n="share.saveImg">🖼 Spremi sliku</button>
       </div>
     </div>
   </div>
@@ -137,18 +138,18 @@
   <!-- share: a stats link someone opened -->
   <div class="share" id="shareView">
     <div class="share-card">
-      <h3 id="svTitle">👤 forest stats</h3>
+      <h3 id="svTitle">👤</h3>
       <div class="share-stats" id="svStats"></div>
       <div class="sv-dots" id="svDots"></div>
       <div class="share-actions">
-        <button id="svPlay">🌲 Play your own</button>
+        <button id="svPlay" data-i18n="share.playOwn">🌲 Igraj svoju</button>
       </div>
     </div>
   </div>
 
   <div class="toast" id="toast"></div>
 
-  <!-- Leaflet, then data, then app, then scratch — all after the DOM exists. -->
+  <!-- Leaflet, then data, then i18n, then app + modules — after the DOM exists. -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
           crossorigin=""></script>
@@ -161,8 +162,10 @@
         document.body.appendChild(s);
       }
       load('parks.js', function () {
-        load('app.js', function () {
-          load('scratch.js', function () { load('share.js', function () { load('bikes.js'); }); });
+        load('i18n.js', function () {
+          load('app.js', function () {
+            load('scratch.js', function () { load('share.js', function () { load('bikes.js'); }); });
+          });
         });
       });
     })();

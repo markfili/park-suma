@@ -1,6 +1,4 @@
-// "Where to next?" scratch card. Reuses globals from app.js:
-// pickNext, setGoal, isVisited, completesDistrict, fmtDist, haversine,
-// gpsActive, userPos, toast.
+// "Where to next?" scratch card. Reuses app.js globals + tr() (i18n.js).
 (function () {
   const scratch  = document.getElementById('scratch');
   const area     = document.getElementById('scArea');
@@ -22,7 +20,7 @@
     [foil, acceptBtn, rerollBtn, revealBtn].forEach(el => el.style.display = '');
     revealed = false; moves = 0;
     setRevealedUI(false);
-    hint.textContent = 'Scratch the foil to reveal your next park…';
+    hint.textContent = tr('scratch.hintStart');
     renderReveal();
     requestAnimationFrame(() => { sizeFoil(); drawFoil(); });
   }
@@ -33,17 +31,17 @@
     [acceptBtn, rerollBtn, revealBtn].forEach(el => el.style.display = 'none');
     nav.style.display = 'none';
     hint.textContent = '';
-    reveal.innerHTML = '<div class="rv-name">🏆 All parks visited!</div>' +
-                       '<div class="rv-meta">You’re a Forest Champion.</div>';
+    reveal.innerHTML = '<div class="rv-name">' + tr('scratch.allTitle') + '</div>' +
+                       '<div class="rv-meta">' + tr('scratch.allMeta') + '</div>';
   }
 
   function renderReveal() {
     const p = pick;
     let meta = p.district;
     if (typeof gpsActive !== 'undefined' && gpsActive && userPos)
-      meta += ' · ' + fmtDist(haversine(userPos.lat, userPos.lon, p.lat, p.lon)) + ' away';
+      meta += ' · ' + tr('scratch.away', { d: fmtDist(haversine(userPos.lat, userPos.lon, p.lat, p.lon)) });
     const badge = (typeof completesDistrict === 'function' && completesDistrict(p.name))
-      ? '<div class="rv-badge">✅ completes ' + p.district + '!</div>' : '';
+      ? '<div class="rv-badge">' + tr('scratch.completes', { d: p.district }) + '</div>' : '';
     reveal.innerHTML = '<div class="rv-name">' + p.name + '</div>' +
                        '<div class="rv-meta">' + meta + '</div>' + badge;
     nav.href = 'https://www.google.com/maps/dir/?api=1&destination=' + p.lat + ',' + p.lon;
@@ -66,7 +64,7 @@
     ctx.fillStyle = 'rgba(234,255,243,.9)';
     ctx.font = 'bold 16px system-ui, sans-serif';
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('🎟  SCRATCH HERE', w / 2, h / 2);
+    ctx.fillText(tr('scratch.here'), w / 2, h / 2);
   }
   function erase(x, y) {
     ctx.globalCompositeOperation = 'destination-out';
@@ -98,7 +96,7 @@
     ctx.globalCompositeOperation = 'destination-out';
     ctx.fillRect(0, 0, w, h);
     setRevealedUI(true);
-    hint.textContent = 'Accept to set this as your 🎯 goal, or re-roll.';
+    hint.textContent = tr('scratch.hintReveal');
   }
   function setRevealedUI(on) { acceptBtn.disabled = !on; nav.style.display = on ? '' : 'none'; }
 
@@ -115,11 +113,20 @@
   acceptBtn.addEventListener('click', () => {
     if (pick && typeof setGoal === 'function') {
       setGoal(pick.name);
-      if (typeof toast === 'function') toast('🎯 Goal set: ' + pick.name);
+      if (typeof toast === 'function') toast(tr('toast.goalSet', { name: pick.name }));
     }
     close();
   });
   document.getElementById('scClose').addEventListener('click', close);
   scratch.addEventListener('click', e => { if (e.target === scratch) close(); });
   document.getElementById('whereNext').addEventListener('click', open);
+
+  // re-render in the new language if the card is open
+  window.scratchRelabel = function () {
+    if (!scratch.classList.contains('show')) return;
+    if (!pick) { renderAllVisited(); return; }
+    hint.textContent = revealed ? tr('scratch.hintReveal') : tr('scratch.hintStart');
+    renderReveal();
+    if (!revealed) drawFoil();
+  };
 })();

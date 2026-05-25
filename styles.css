@@ -189,6 +189,11 @@ button.ghost.danger { color: #ff9b8a; border-color: #6e3b32; }
 /* ---- footer ---- */
 footer { color: var(--mint-dim); font-size: .72rem; margin-top: 18px; text-align: center; opacity: .85; max-width: min(94vw,460px); }
 .ver { display: inline-block; margin-top: 4px; opacity: .7; font-variant-numeric: tabular-nums; letter-spacing: .3px; }
+.lang { display: inline-block; margin-left: 10px; }
+.lang button { background: transparent; border: 1px solid var(--line); color: var(--mint-dim); font: inherit; font-size: .66rem; font-weight: 700; padding: 2px 8px; cursor: pointer; }
+.lang button:first-child { border-radius: 999px 0 0 999px; }
+.lang button:last-child { border-radius: 0 999px 999px 0; border-left: none; }
+.lang button.active { background: var(--mint); color: #06281c; border-color: var(--mint); }
 
 /* ---- banner overlay ---- */
 .banner {
