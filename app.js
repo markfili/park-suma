@@ -464,6 +464,17 @@ document.querySelectorAll('.modeseg').forEach(s => s.classList.toggle('active', 
 $('appVer').textContent = 'v' + APP_VERSION;
 maybeShowWhatsNew();
 
+// Desktop shows both Card + Map at once, so the map can't lazy-init on toggle.
+// Eager-init at boot if we start in desktop, and again whenever the breakpoint
+// is crossed (e.g. window resized from narrow to wide).
+function ensureMapForDesktop(){
+  if (!DESKTOP_MQ.matches) return;
+  initMap();
+  if (mapReady) setTimeout(() => map.invalidateSize(), 0);
+}
+ensureMapForDesktop();
+DESKTOP_MQ.addEventListener('change', ensureMapForDesktop);
+
 (function showSha(){
   const el = $('sha'); if (!el) return;
   fetch('https://api.github.com/repos/markfili/park-suma/commits/main')
