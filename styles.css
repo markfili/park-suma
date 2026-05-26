@@ -290,6 +290,66 @@ button:disabled { opacity: .45; cursor: default; }
 .rv-meta { font-size: .8rem; color: var(--mint-dim); }
 .rv-badge { margin-top: 4px; font-size: .78rem; font-weight: 700; color: #3a2c00; background: var(--gold); padding: 3px 8px; border-radius: 999px; }
 .foil { position: absolute; inset: 0; cursor: grab; touch-action: none; }
+
+/* ---- picker toggle (Scratch vs Slot inside the same modal) ---- */
+.picker-toggle {
+  display: inline-flex; margin: 0 0 12px;
+  background: var(--bg2); border: 1px solid var(--line); border-radius: 999px; padding: 2px;
+}
+.picker-toggle .modeseg { padding: 4px 14px; }
+.picker-toggle[aria-disabled="true"] { opacity: .5; pointer-events: none; }
+
+/* ---- slot overlay (lives inside .scratch-area, parallel to .foil) ----
+   Three reels with strips that translateY into the centered payline window.
+   Strip cells are 44px tall; the visible window holds 3 cells so the winner
+   sits at row 1 (the middle). touch-action:none so the spin doesn't fight
+   vertical page scroll on mobile. */
+.slot {
+  position: absolute; inset: 0;
+  display: flex; gap: 4px; padding: 4px;
+  background: var(--bg2); touch-action: none;
+  transition: opacity .35s ease;
+}
+.slot.fade { opacity: 0; pointer-events: none; }
+.reel {
+  position: relative; flex: 1; overflow: hidden; border-radius: 8px;
+  background: linear-gradient(180deg, #06281c 0%, var(--tile) 50%, #06281c 100%);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.reel .strip {
+  position: absolute; left: 0; right: 0; top: 0;
+  display: flex; flex-direction: column;
+  will-change: transform; transform: translateY(0);
+}
+.reel .cell {
+  height: 44px; display: grid; place-items: center; gap: 0;
+  color: var(--mint); text-shadow: 0 1px 2px rgba(0,0,0,.35);
+}
+.reel .cell .emoji { font-size: 1.15rem; line-height: 1; }
+.reel .cell .abbr {
+  font: 700 .68rem/1 system-ui, sans-serif; letter-spacing: .6px;
+  margin-top: 2px; opacity: .92;
+}
+.reel.win { animation: jackpot .55s ease; }
+@keyframes jackpot {
+  0%   { box-shadow: inset 0 0 0 1px var(--line); }
+  40%  { box-shadow: inset 0 0 0 2px var(--gold), 0 0 14px var(--gold); }
+  100% { box-shadow: inset 0 0 0 1px var(--line); }
+}
+/* Payline: thin gold band over the center row, marks the winning slot. */
+.slot-window {
+  position: absolute; left: 4px; right: 4px; top: 50%;
+  height: 44px; transform: translateY(-50%);
+  pointer-events: none; border-radius: 6px;
+  border-top: 1px solid var(--gold);
+  border-bottom: 1px solid var(--gold);
+  background: linear-gradient(180deg, transparent, rgba(255,213,107,.10), transparent);
+}
+/* Respect users who prefer reduced motion: drop the 2s spin to a quick fade. */
+@media (prefers-reduced-motion: reduce) {
+  .reel .strip { transition: none !important; }
+  .reel.win { animation: none; }
+}
 /* Small static-feel preview map that slides in once the foil is scratched off.
    Width-only border so the 0 → 130px height grow doesn't paint a 1px line on
    the collapsed state. Pointer events disabled — it's read-only eye candy. */

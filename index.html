@@ -75,7 +75,7 @@
   <footer>
     <span data-i18n="footer.tagline">24 zaštićene park-šume grada Zagreba</span> · 🟢 greengo demo ·
     <span id="gpsStatus"></span><br>
-    <span class="ver"><span id="appVer">v0.13.0</span> <span id="sha"></span></span>
+    <span class="ver"><span id="appVer">v0.14.0</span> <span id="sha"></span></span>
     <span class="lang" id="langToggle"><button data-lang="hr">HR</button><button data-lang="en">EN</button></span>
   </footer>
 
@@ -94,15 +94,26 @@
     <div class="scratch-card">
       <button class="modal-x" id="scClose" aria-label="✕">✕</button>
       <h3 data-i18n="scratch.title">🎟 Kamo dalje?</h3>
+      <div class="picker-toggle" id="scPicker">
+        <button class="modeseg active" data-picker="scratch" data-i18n="picker.scratch">🎟 Grebi</button>
+        <button class="modeseg" data-picker="slot" data-i18n="picker.slot">🎰 Spinaj</button>
+      </div>
       <div class="scratch-area" id="scArea">
         <div class="reveal" id="scReveal"></div>
         <canvas class="foil" id="scFoil"></canvas>
+        <div class="slot" id="scSlot" hidden>
+          <div class="reel"><div class="strip"></div></div>
+          <div class="reel"><div class="strip"></div></div>
+          <div class="reel"><div class="strip"></div></div>
+          <div class="slot-window"></div>
+        </div>
       </div>
       <div class="scratch-map" id="scMap" aria-hidden="true"></div>
       <div class="scratch-hint muted" id="scHint" data-i18n="scratch.hintStart">Grebi foliju da otkriješ sljedeći park…</div>
       <div class="scratch-actions">
         <button id="scReroll" class="ghost" data-i18n="scratch.reroll">🔄 Ponovi</button>
         <button id="scRevealBtn" class="ghost" data-i18n="scratch.reveal">Otkrij</button>
+        <button id="scSpinBtn" class="ghost" data-i18n="slot.spin" hidden>🎰 Spinaj</button>
         <a id="scNav" class="pop-btn" href="#" target="_blank" rel="noopener" style="display:none" data-i18n="scratch.nav">Navigacija ↗</a>
         <button id="scShare" class="ghost" style="display:none" data-i18n="scratch.share">📤 Podijeli</button>
         <button id="scAccept" disabled data-i18n="scratch.accept">🎯 Prihvati</button>

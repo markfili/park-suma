@@ -17,6 +17,8 @@ const STRINGS = {
     "scratch.hintStart": "Grebi foliju da otkriješ sljedeći park…",
     "scratch.hintReveal": "Prihvati za 🎯 cilj ili ponovi.",
     "scratch.here": "🎟  GREBI OVDJE",
+    "picker.scratch": "🎟 Grebi", "picker.slot": "🎰 Spinaj",
+    "slot.spin": "🎰 Spinaj", "slot.hintStart": "Tapni 🎰 Spinaj da odlučiš…",
     "scratch.reroll": "🔄 Ponovi", "scratch.reveal": "Otkrij",
     "scratch.accept": "🎯 Prihvati", "scratch.nav": "Navigacija ↗", "scratch.share": "📤 Podijeli",
     "scratch.allTitle": "🏆 Svi parkovi posjećeni!", "scratch.allMeta": "Ti si Prvak šuma.",
@@ -73,6 +75,7 @@ const STRINGS = {
         <li><strong>🔀 Nova kartica</strong> premiješava ploču. Napredak se sprema automatski.</li>
       </ul>`,
     "changelog": {
+      "0.14.0": ["🎰 Slot za odluku — u „Kamo dalje?” prebaci se na Spinaj i pokreni tri kotača, sva tri staju na isti park."],
       "0.13.0": ["🗺 Minijaturna karta na grebalici — kad otkriješ park, pojavi se mala karta s oznakom njegove lokacije."],
       "0.12.0": ["📤 Podijeli rezultat „Kamo dalje?” — gumb na otkrivenoj karti šalje sliku i tekst kroz nativni izbornik dijeljenja.", "🚲 Jasnija greška kada se bicikli ne učitaju — razlog (offline, mreža, isteklo vrijeme, HTTP status, neispravni podaci, nema Zagreba u feedu) prikazan ispod prekidača.", "🖥️ Raspored za stolne uređaje — Kartica i Karta jedna pored druge na širim ekranima (≥1024 px), dodir polja centrira park na karti."],
       "0.11.0": ["🌐 Prebacivanje jezika — hrvatski / engleski (zadano hrvatski)."],
@@ -102,6 +105,8 @@ const STRINGS = {
     "scratch.hintStart": "Scratch the foil to reveal your next park…",
     "scratch.hintReveal": "Accept to set this as your 🎯 goal, or re-roll.",
     "scratch.here": "🎟  SCRATCH HERE",
+    "picker.scratch": "🎟 Scratch", "picker.slot": "🎰 Spin",
+    "slot.spin": "🎰 Spin", "slot.hintStart": "Tap 🎰 Spin to decide…",
     "scratch.reroll": "🔄 Re-roll", "scratch.reveal": "Reveal",
     "scratch.accept": "🎯 Accept", "scratch.nav": "Navigate ↗", "scratch.share": "📤 Share",
     "scratch.allTitle": "🏆 All parks visited!", "scratch.allMeta": "You’re a Forest Champion.",
@@ -158,6 +163,7 @@ const STRINGS = {
         <li><strong>🔀 New card</strong> reshuffles the board. Progress saves automatically.</li>
       </ul>`,
     "changelog": {
+      "0.14.0": ["🎰 Slot-machine picker — inside “Where to next?” toggle to Spin and three reels stop on your jackpot park."],
       "0.13.0": ["🗺 Mini-map on the scratch card — when you reveal the park, a small map pops in with a marker at its location."],
       "0.12.0": ["📤 Share your “Where to next?” pick — a button on the revealed card sends a one-park image + text through the native share sheet.", "🚲 Clearer bike-loading errors — the reason (offline, network, timeout, HTTP status, bad data, no Zagreb in feed) now shows under the toggle.", "🖥️ Desktop layout — Card and Map side-by-side on wider screens (≥1024 px); tapping a tile centers that park on the map."],
       "0.11.0": ["🌐 Language switcher — Croatian / English (Croatian by default)."],

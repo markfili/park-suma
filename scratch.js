@@ -11,33 +11,92 @@
   const shareBtn  = document.getElementById('scShare');
   const nav      = document.getElementById('scNav');
   const mapEl    = document.getElementById('scMap');
+  const slot     = document.getElementById('scSlot');
+  const reels    = slot ? slot.querySelectorAll('.reel') : [];
+  const spinBtn  = document.getElementById('scSpinBtn');
+  const pickerEl = document.getElementById('scPicker');
   const ctx = foil.getContext('2d', { willReadFrequently: true });
 
   let pick = null, revealed = false, drawing = false, moves = 0;
   let scMap = null, scMarker = null;
+  let spinning = false;
+
+  // ---- picker mode (Scratch vs Slot), persisted ----
+  const PICKER_KEY = 'parkSumaBingo:pickerMode';
+  let pickerMode = 'scratch';
+  try {
+    const v = localStorage.getItem(PICKER_KEY);
+    if (v === 'scratch' || v === 'slot') pickerMode = v;
+  } catch (e) {}
+  function savePicker() { try { localStorage.setItem(PICKER_KEY, pickerMode); } catch (e) {} }
+
+  // ---- slot tuning (kept near the top so it's easy to tweak feel) ----
+  const SLOT_DURATIONS = [1000, 1500, 2000]; // ms, staggered stops per reel
+  const SLOT_STRIP_LEN = 30;                 // cells in each strip
+  const SLOT_WINNER_AT = 25;                 // winner index inside the strip
+  const SLOT_CELL_H = 44;                    // must match .reel .cell height in CSS
+  const SLOT_HOLD_MS = 500;                  // beat to admire the jackpot before reveal
+  // Diacritic-fold + first-3 uppercase. Collisions (MIR, REM) are intentional —
+  // they make the reels feel like a real slot and disambiguation happens via
+  // the full reveal text below.
+  function abbr3(name) {
+    const folded = name.normalize('NFD').replace(/[̀-ͯ]/g, '');
+    return folded.replace(/\s+/g, '').slice(0, 3).toUpperCase();
+  }
 
   function open() {
     pick = (typeof pickNext === 'function') ? pickNext() : null;
     scratch.classList.add('show');
+    syncPickerUI();
     if (!pick) { renderAllVisited(); return; }
-    [foil, acceptBtn, rerollBtn, revealBtn].forEach(el => el.style.display = '');
+    [acceptBtn, rerollBtn].forEach(el => el.style.display = '');
     revealed = false; moves = 0;
     setRevealedUI(false);
     hideMap();
-    hint.textContent = tr('scratch.hintStart');
+    hint.textContent = tr(pickerMode === 'slot' ? 'slot.hintStart' : 'scratch.hintStart');
     renderReveal();
-    requestAnimationFrame(() => { sizeFoil(); drawFoil(); });
+    setOverlayForMode();
+    if (pickerMode === 'scratch') {
+      requestAnimationFrame(() => { sizeFoil(); drawFoil(); });
+    } else {
+      resetSlot();
+    }
   }
   function close() { scratch.classList.remove('show'); hideMap(); }
 
   function renderAllVisited() {
     foil.style.display = 'none';
-    [acceptBtn, rerollBtn, revealBtn, shareBtn].forEach(el => el.style.display = 'none');
+    slot.hidden = true;
+    [acceptBtn, rerollBtn, revealBtn, spinBtn, shareBtn].forEach(el => el.style.display = el === shareBtn ? 'none' : 'none');
     nav.style.display = 'none';
     hideMap();
     hint.textContent = '';
     reveal.innerHTML = '<div class="rv-name">' + tr('scratch.allTitle') + '</div>' +
                        '<div class="rv-meta">' + tr('scratch.allMeta') + '</div>';
+  }
+
+  // ---- mode-aware overlay swap ----
+  // Both the canvas foil and the slot live inside .scratch-area as siblings
+  // above .reveal. Only one is mounted per mode; the other is fully hidden.
+  function setOverlayForMode() {
+    if (pickerMode === 'slot') {
+      foil.style.display = 'none';
+      slot.hidden = false;
+      slot.classList.remove('fade');
+      revealBtn.hidden = true;
+      spinBtn.hidden = false;
+      spinBtn.disabled = false;
+    } else {
+      slot.hidden = true;
+      foil.style.display = '';
+      revealBtn.hidden = false;
+      spinBtn.hidden = true;
+    }
+  }
+  function syncPickerUI() {
+    pickerEl.querySelectorAll('button[data-picker]').forEach(b => {
+      b.classList.toggle('active', b.dataset.picker === pickerMode);
+    });
   }
 
   // Small read-only Leaflet preview that appears below the foil on reveal.
@@ -129,9 +188,13 @@
 
   function doReveal() {
     revealed = true;
+    // Scratch overlay: erase whatever foil is left so the reveal is instant
+    // even if the user hit "Otkrij" before scratching.
     const w = area.clientWidth, h = area.clientHeight;
     ctx.globalCompositeOperation = 'destination-out';
     ctx.fillRect(0, 0, w, h);
+    // Slot overlay: fade the reels out over the reveal underneath.
+    if (pickerMode === 'slot') slot.classList.add('fade');
     setRevealedUI(true);
     hint.textContent = tr('scratch.hintReveal');
     if (pick) showMap(pick);
@@ -140,6 +203,86 @@
     acceptBtn.disabled = !on;
     nav.style.display = on ? '' : 'none';
     shareBtn.style.display = on ? '' : 'none';
+    if (pickerMode === 'slot') { spinBtn.hidden = on; rerollBtn.style.display = on ? '' : ''; }
+  }
+
+  // ---- slot reels ----------------------------------------------------------
+  // Three reels each get an independently-shuffled strip of SLOT_STRIP_LEN
+  // park tiles, with the same winning pick injected at SLOT_WINNER_AT. They
+  // start spinning together but stop at staggered durations, with the third
+  // reel's final tile triggering a gold jackpot pulse before the reveal fade.
+  function fillerName(exclude) {
+    if (typeof PARKS === 'undefined' || !PARKS.length) return exclude;
+    let n;
+    do { n = PARKS[Math.floor(Math.random() * PARKS.length)].name; } while (n === exclude);
+    return n;
+  }
+  function cellHtml(name) {
+    return '<div class="cell"><span class="emoji">🌲</span><span class="abbr">'
+         + abbr3(name) + '</span></div>';
+  }
+  function buildStrip(reel, winner) {
+    const strip = reel.querySelector('.strip');
+    let html = '';
+    for (let i = 0; i < SLOT_STRIP_LEN; i++) {
+      const name = (i === SLOT_WINNER_AT) ? winner : fillerName(winner);
+      html += cellHtml(name);
+    }
+    strip.style.transition = 'none';
+    strip.style.transform = 'translateY(0)';
+    strip.innerHTML = html;
+    // Force a layout flush so the next transition assignment animates.
+    void strip.offsetHeight;
+  }
+  function resetSlot() {
+    if (!pick) return;
+    reels.forEach(r => { r.classList.remove('win'); buildStrip(r, pick.name); });
+    slot.classList.remove('fade');
+  }
+  function spinReel(reel, durMs) {
+    const strip = reel.querySelector('.strip');
+    // Center the winner inside a 3-cell visible window:
+    //   visible window holds rows 0..2 (cell height SLOT_CELL_H each).
+    //   winner sits at strip index SLOT_WINNER_AT; pull it to row 1 (center).
+    const targetY = -((SLOT_WINNER_AT - 1) * SLOT_CELL_H);
+    return new Promise(resolve => {
+      const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce) {
+        strip.style.transition = 'none';
+        strip.style.transform = 'translateY(' + targetY + 'px)';
+        setTimeout(resolve, 120);
+        return;
+      }
+      strip.style.transition = 'transform ' + durMs + 'ms cubic-bezier(.16,.84,.3,1)';
+      strip.style.transform = 'translateY(' + targetY + 'px)';
+      let done = false;
+      const onEnd = () => {
+        if (done) return; done = true;
+        strip.removeEventListener('transitionend', onEnd);
+        resolve();
+      };
+      strip.addEventListener('transitionend', onEnd);
+      // Safety net in case transitionend never fires (interrupted, tab hidden).
+      setTimeout(onEnd, durMs + 200);
+    });
+  }
+  async function runSlot() {
+    if (!pick || spinning || revealed) return;
+    spinning = true;
+    pickerEl.setAttribute('aria-disabled', 'true');
+    spinBtn.disabled = true; rerollBtn.disabled = true;
+    resetSlot();
+    // Build promises before kicking off so all three start in the same tick.
+    const spins = [];
+    reels.forEach((r, i) => spins.push(
+      spinReel(r, SLOT_DURATIONS[i]).then(() => { if (i === reels.length - 1) r.classList.add('win'); })
+    ));
+    await Promise.all(spins);
+    await new Promise(r => setTimeout(r, SLOT_HOLD_MS));
+    spinning = false;
+    pickerEl.removeAttribute('aria-disabled');
+    rerollBtn.disabled = false;
+    doReveal();
   }
 
   // ---- share (text + PNG, mirrors share.js fallback ladder) ----
@@ -206,7 +349,20 @@
   foil.addEventListener('touchend', end);
 
   revealBtn.addEventListener('click', () => { if (!revealed) doReveal(); });
-  rerollBtn.addEventListener('click', open);
+  spinBtn.addEventListener('click', () => { if (!revealed && !spinning) runSlot(); });
+  rerollBtn.addEventListener('click', () => { if (!spinning) open(); });
+  pickerEl.addEventListener('click', e => {
+    const b = e.target.closest('button[data-picker]'); if (!b || spinning) return;
+    const next = b.dataset.picker;
+    if (next === pickerMode) return;
+    pickerMode = next; savePicker();
+    // Re-open in the new mode keeps the *same* pick if not yet revealed; if
+    // already revealed, open() will roll a fresh pick (parity with reroll).
+    if (revealed) open();
+    else { syncPickerUI(); setOverlayForMode(); hint.textContent = tr(pickerMode === 'slot' ? 'slot.hintStart' : 'scratch.hintStart');
+           if (pickerMode === 'slot') resetSlot();
+           else requestAnimationFrame(() => { sizeFoil(); drawFoil(); }); }
+  });
   acceptBtn.addEventListener('click', () => {
     if (pick && typeof setGoal === 'function') {
       setGoal(pick.name);
@@ -222,8 +378,10 @@
   window.scratchRelabel = function () {
     if (!scratch.classList.contains('show')) return;
     if (!pick) { renderAllVisited(); return; }
-    hint.textContent = revealed ? tr('scratch.hintReveal') : tr('scratch.hintStart');
+    hint.textContent = revealed
+      ? tr('scratch.hintReveal')
+      : tr(pickerMode === 'slot' ? 'slot.hintStart' : 'scratch.hintStart');
     renderReveal();
-    if (!revealed) drawFoil();
+    if (!revealed && pickerMode === 'scratch') drawFoil();
   };
 })();
