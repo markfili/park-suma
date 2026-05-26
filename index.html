@@ -75,7 +75,7 @@
   <footer>
     <span data-i18n="footer.tagline">24 zaštićene park-šume grada Zagreba</span> · 🟢 greengo demo ·
     <span id="gpsStatus"></span><br>
-    <span class="ver"><span id="appVer">v0.14.0</span> <span id="sha"></span></span>
+    <span class="ver"><span id="appVer">v0.15.0</span> <span id="sha"></span></span>
     <span class="lang" id="langToggle"><button data-lang="hr">HR</button><button data-lang="en">EN</button></span>
   </footer>
 
@@ -118,6 +118,16 @@
         <button id="scShare" class="ghost" style="display:none" data-i18n="scratch.share">📤 Podijeli</button>
         <button id="scAccept" disabled data-i18n="scratch.accept">🎯 Prihvati</button>
       </div>
+    </div>
+  </div>
+
+  <!-- district detail: parks in the selected area -->
+  <div class="dist" id="dist">
+    <div class="dist-card">
+      <button class="modal-x" id="distX" aria-label="✕">✕</button>
+      <h3 id="distTitle"></h3>
+      <div class="dist-meta" id="distMeta"></div>
+      <ul class="dist-list" id="distList"></ul>
     </div>
   </div>
 

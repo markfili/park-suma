@@ -118,13 +118,6 @@ main { width: min(94vw, 460px); }
 .cell.win { animation: pop .5s ease; box-shadow: 0 0 0 2px var(--gold) inset, 0 0 16px var(--gold); }
 @keyframes pop { 0%{transform:scale(1)} 40%{transform:scale(1.12)} 100%{transform:scale(1)} }
 
-.pin {
-  position: absolute; bottom: 2px; right: 3px;
-  font-size: .72rem; opacity: .5; padding: 2px;
-  text-decoration: none; line-height: 1;
-}
-.pin:hover { opacity: 1; }
-
 /* ---- controls ---- */
 .controls { display: flex; gap: 10px; align-items: center; margin-top: 4px; flex-wrap: wrap; justify-content: center; }
 button {
@@ -182,11 +175,15 @@ button.ghost.danger { color: #ff9b8a; border-color: #6e3b32; }
   margin-top: 16px;
 }
 .chip {
+  font: inherit;
   font-size: .72rem; font-weight: 600;
   background: var(--tile); border: 1px solid var(--line); color: var(--mint-dim);
   border-radius: 999px; padding: 5px 10px; white-space: nowrap;
+  cursor: pointer;
 }
+.chip:hover, .chip:focus-visible { border-color: var(--mint); color: var(--mint); outline: none; }
 .chip.done { background: var(--gold); color: #3a2c00; border-color: var(--gold); }
+.chip.done:hover, .chip.done:focus-visible { color: #3a2c00; filter: brightness(1.05); }
 
 /* ---- footer ---- */
 footer { color: var(--mint-dim); font-size: .72rem; margin-top: 18px; text-align: center; opacity: .85; max-width: min(94vw,460px); }
@@ -256,14 +253,14 @@ footer { color: var(--mint-dim); font-size: .72rem; margin-top: 18px; text-align
   50%     { box-shadow: 0 0 0 2px var(--gold) inset, 0 0 12px var(--gold); }
 }
 
-/* ---- modal overlays (scratch + help) ---- */
-.scratch, .help, .share {
+/* ---- modal overlays (scratch + help + dist) ---- */
+.scratch, .help, .share, .dist {
   position: fixed; inset: 0; display: none;
   align-items: center; justify-content: center;
   background: rgba(4,20,15,.74); backdrop-filter: blur(3px); z-index: 1000;
 }
-.scratch.show, .help.show, .share.show { display: flex; animation: fade .3s ease; }
-.scratch-card, .help-card, .share-card {
+.scratch.show, .help.show, .share.show, .dist.show { display: flex; animation: fade .3s ease; }
+.scratch-card, .help-card, .share-card, .dist-card {
   position: relative; background: var(--bg); border: 2px solid var(--line);
   border-radius: 18px; padding: 22px; width: min(92vw, 380px); text-align: center;
 }
@@ -389,6 +386,27 @@ button:disabled { opacity: .45; cursor: default; }
 .help-body p { margin: .2em 0 .6em; }
 .help-body ul { margin: .2em 0; padding-left: 1.2em; }
 .help-body li { margin: .35em 0; }
+
+/* ---- district modal: parks in the selected area ---- */
+.dist-card h3 { margin: 0 0 6px; font-size: 1rem; }
+.dist-meta { color: var(--mint-dim); font-size: .78rem; margin: 0 0 12px; }
+.dist-meta.done { color: var(--gold); }
+.dist-list {
+  list-style: none; margin: 0; padding: 0; text-align: left;
+  max-height: 60vh; overflow: auto;
+}
+.dist-row {
+  width: 100%; display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; margin: 4px 0;
+  background: var(--tile); border: 1px solid var(--line); color: var(--mint);
+  border-radius: 12px; font: inherit; font-size: .85rem; text-align: left; cursor: pointer;
+}
+.dist-row:hover, .dist-row:focus-visible { border-color: var(--mint); outline: none; }
+.dist-row.visited { background: rgba(47,174,111,.18); border-color: rgba(47,174,111,.55); }
+.dist-row.goal    { border-color: var(--gold); }
+.dist-row .dr-mark { font-size: 1rem; line-height: 1; }
+.dist-row .dr-name { flex: 1; font-weight: 600; }
+.dist-row .dr-meta { color: var(--mint-dim); font-size: .72rem; font-variant-numeric: tabular-nums; }
 .cl { margin-bottom: 10px; }
 .cl h4 { margin: .4em 0 .2em; color: var(--mint-dim); font-size: .82rem; }
 .cl.cur h4 { color: var(--gold); }

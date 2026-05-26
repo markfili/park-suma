@@ -6,7 +6,7 @@ const FREE = 12;                          // center cell of the 5×5
 const STORAGE_KEY = "parkSumaBingo:v2";
 const SEEN_VERSION_KEY = "parkSumaBingo:seenVersion";
 const CHECKIN_M = 300;                     // GPS check-in radius (metres)
-const APP_VERSION = "0.14.0";             // single source of truth for the version
+const APP_VERSION = "0.15.0";             // single source of truth for the version
 
 // Level ladder — names are i18n keys (tier.<key>); thresholds are counts.
 const TIERS = [
@@ -21,7 +21,7 @@ const TIERS = [
 function tierName(t){ return tr('tier.' + t.key); }
 
 // Versions (newest first) for the "What's new" tab; notes live in i18n.
-const CHANGELOG_VERSIONS = ["0.14.0","0.13.0","0.12.0","0.11.0","0.10.0","0.9.0","0.8.0","0.7.0","0.6.0","0.5.0","0.4.0","0.3.0","0.2.0","0.1.0"];
+const CHANGELOG_VERSIONS = ["0.15.0","0.14.0","0.13.0","0.12.0","0.11.0","0.10.0","0.9.0","0.8.0","0.7.0","0.6.0","0.5.0","0.4.0","0.3.0","0.2.0","0.1.0"];
 
 // ---- DOM ----
 const $ = id => document.getElementById(id);
@@ -152,12 +152,6 @@ function buildCard(fresh){
     } else {
       const name = order[p++]; cellNames.push(name);
       cell.dataset.name = name; cell.textContent = name;
-      const pin = document.createElement('a');
-      pin.className = 'pin'; pin.textContent = '📍';
-      pin.href = mapsLink(name); pin.target = '_blank'; pin.rel = 'noopener';
-      pin.title = tr('title.pin');
-      pin.addEventListener('click', e => e.stopPropagation());
-      cell.appendChild(pin);
       cell.addEventListener('click', () => { focusParkOnMap(name); attemptCheckin(name); });
     }
     board.appendChild(cell); cells.push(cell);
@@ -268,11 +262,68 @@ function refreshDistricts(){
   districtsEl.innerHTML = '';
   DISTRICTS.forEach(d => {
     const v = d.parks.filter(isVisited).length, t = d.parks.length;
-    const chip = document.createElement('span');
+    const chip = document.createElement('button');
+    chip.type = 'button';
     chip.className = 'chip' + (v === t ? ' done' : '');
     chip.textContent = `${d.name} ${v}/${t}`;
+    chip.addEventListener('click', () => openDistrict(d.name));
     districtsEl.appendChild(chip);
   });
+  // If the modal is open, keep it in sync (e.g. after a check-in toggle).
+  if ($('dist').classList.contains('show') && openDist) renderDistrict(openDist);
+}
+
+// ---- district modal: parks in a selected area ----
+let openDist = null;
+function openDistrict(name){
+  openDist = name;
+  renderDistrict(name);
+  $('dist').classList.add('show');
+}
+function closeDistrict(){
+  openDist = null;
+  $('dist').classList.remove('show');
+}
+function renderDistrict(name){
+  const d = DISTRICTS.find(x => x.name === name);
+  if (!d) return;
+  const v = d.parks.filter(isVisited).length, t = d.parks.length;
+  $('distTitle').textContent = tr('dist.title', { d: name });
+  const meta = $('distMeta');
+  meta.classList.toggle('done', v === t);
+  meta.textContent = v === t ? tr('dist.swept', { t }) : tr('dist.progress', { v, t });
+  const list = $('distList');
+  list.innerHTML = '';
+  d.parks.forEach(n => {
+    const p = BY_NAME[n];
+    const on = isVisited(n), goal = !on && n === state.goal;
+    const li = document.createElement('li');
+    const row = document.createElement('button');
+    row.type = 'button';
+    row.className = 'dist-row' + (on ? ' visited' : '') + (goal ? ' goal' : '');
+    const mark = on ? '✅' : (goal ? '🎯' : '⚪');
+    const meta2 = [p.ha ? `${p.ha} ha` : null,
+                   on ? state.visited[n] : null,
+                   p.approx ? tr('dist.rowApprox') : null].filter(Boolean).join(' · ');
+    row.innerHTML = `<span class="dr-mark">${mark}</span>` +
+                    `<span class="dr-name">${n}</span>` +
+                    (meta2 ? `<span class="dr-meta">${meta2}</span>` : '');
+    row.addEventListener('click', () => { closeDistrict(); focusPark(n); });
+    li.appendChild(row);
+    list.appendChild(li);
+  });
+}
+// Center on the park (switching to Map view first on mobile, where Card hides it).
+function focusPark(name){
+  const p = BY_NAME[name]; if (!p) return;
+  if (!DESKTOP_MQ.matches) showView('map');
+  initMap();
+  setTimeout(() => {
+    if (!map || !mapReady) return;
+    map.flyTo([p.lat, p.lon], 14, { duration: 0.6 });
+    const m = markers[name];
+    if (m) m.bindPopup(popupHtml(p)).openPopup();
+  }, 50);
 }
 function refreshNearest(){
   if (!gpsActive || !userPos) { nearHint.textContent = ''; return; }
@@ -455,6 +506,13 @@ $('infoBtn').addEventListener('click', () => openHelp('howto'));
 $('helpX').addEventListener('click', closeHelp);
 $('help').addEventListener('click', e => { if (e.target === $('help')) closeHelp(); });
 $('helpTabs').addEventListener('click', e => { const t = e.target.closest('.help-tab'); if (t) renderHelp(t.dataset.tab); });
+$('distX').addEventListener('click', closeDistrict);
+$('dist').addEventListener('click', e => { if (e.target === $('dist')) closeDistrict(); });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if ($('dist').classList.contains('show')) closeDistrict();
+  else if ($('help').classList.contains('show')) closeHelp();
+});
 
 // ---- init ----
 buildCard(false);
