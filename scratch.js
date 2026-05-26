@@ -36,9 +36,9 @@
   const SLOT_WINNER_AT = 25;                 // winner index inside the strip
   const SLOT_CELL_H = 44;                    // must match .reel .cell height in CSS
   const SLOT_HOLD_MS = 500;                  // beat to admire the jackpot before reveal
-  // Diacritic-fold + first-3 uppercase. Collisions (MIR, REM) are intentional —
-  // they make the reels feel like a real slot and disambiguation happens via
-  // the full reveal text below.
+  // Diacritic-fold + first-3 uppercase. Two parks share each of MIR / REM, so
+  // filler tiles are pooled by abbreviation: anything with the winner's abbr
+  // is excluded so no other reel cell can read like the winner.
   function abbr3(name) {
     const folded = name.normalize('NFD').replace(/[̀-ͯ]/g, '');
     return folded.replace(/\s+/g, '').slice(0, 3).toUpperCase();
@@ -211,23 +211,42 @@
   // park tiles, with the same winning pick injected at SLOT_WINNER_AT. They
   // start spinning together but stop at staggered durations, with the third
   // reel's final tile triggering a gold jackpot pulse before the reveal fade.
-  function fillerName(exclude) {
-    if (typeof PARKS === 'undefined' || !PARKS.length) return exclude;
-    let n;
-    do { n = PARKS[Math.floor(Math.random() * PARKS.length)].name; } while (n === exclude);
-    return n;
-  }
   function cellHtml(name) {
     return '<div class="cell"><span class="emoji">🌲</span><span class="abbr">'
          + abbr3(name) + '</span></div>';
   }
-  function buildStrip(reel, winner) {
+  // Build all three reel strips at once so the cross-reel constraint can be
+  // enforced: the *only* row where all three reels share an abbreviation is
+  // SLOT_WINNER_AT. Off-payline rows show at most two reels with the same
+  // abbr; vertical column visibility (3 visible rows per reel) can never
+  // produce a 3-of-a-kind because row 24/26 are pooled away from winnerAbbr
+  // and the middle row is the winner.
+  function buildAllStrips(winnerName) {
+    const winnerAbbr = abbr3(winnerName);
+    const pool = (typeof PARKS !== 'undefined' ? PARKS : [])
+      .filter(p => abbr3(p.name) !== winnerAbbr)
+      .map(p => p.name);
+    if (!pool.length) return null;
+    const rand = () => pool[Math.floor(Math.random() * pool.length)];
+    const strips = [[], [], []];
+    for (let row = 0; row < SLOT_STRIP_LEN; row++) {
+      if (row === SLOT_WINNER_AT) {
+        strips.forEach(s => s.push(winnerName));
+        continue;
+      }
+      const a = rand(), b = rand();
+      let c;
+      // Guarantee: if a and b share an abbr, c must differ — so no off-payline
+      // row ever shows three matching tiles across reels.
+      do { c = rand(); } while (abbr3(a) === abbr3(b) && abbr3(c) === abbr3(a));
+      strips[0].push(a); strips[1].push(b); strips[2].push(c);
+    }
+    return strips;
+  }
+  function buildStrip(reel, names) {
     const strip = reel.querySelector('.strip');
     let html = '';
-    for (let i = 0; i < SLOT_STRIP_LEN; i++) {
-      const name = (i === SLOT_WINNER_AT) ? winner : fillerName(winner);
-      html += cellHtml(name);
-    }
+    for (let i = 0; i < names.length; i++) html += cellHtml(names[i]);
     strip.style.transition = 'none';
     strip.style.transform = 'translateY(0)';
     strip.innerHTML = html;
@@ -236,7 +255,9 @@
   }
   function resetSlot() {
     if (!pick) return;
-    reels.forEach(r => { r.classList.remove('win'); buildStrip(r, pick.name); });
+    const all = buildAllStrips(pick.name);
+    if (!all) return;
+    reels.forEach((r, i) => { r.classList.remove('win'); buildStrip(r, all[i]); });
     slot.classList.remove('fade');
   }
   function spinReel(reel, durMs) {
