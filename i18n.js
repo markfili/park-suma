@@ -18,9 +18,11 @@ const STRINGS = {
     "scratch.hintReveal": "Prihvati za 🎯 cilj ili ponovi.",
     "scratch.here": "🎟  GREBI OVDJE",
     "scratch.reroll": "🔄 Ponovi", "scratch.reveal": "Otkrij",
-    "scratch.accept": "🎯 Prihvati", "scratch.nav": "Navigacija ↗",
+    "scratch.accept": "🎯 Prihvati", "scratch.nav": "Navigacija ↗", "scratch.share": "📤 Podijeli",
     "scratch.allTitle": "🏆 Svi parkovi posjećeni!", "scratch.allMeta": "Ti si Prvak šuma.",
     "scratch.completes": "✅ dovršava {d}!", "scratch.away": "{d} udaljeno",
+    "scratch.shareText": "🎯 {name} ide u {park} ({district}) — sljedeća park-šuma ✨",
+    "scratch.imgTitle": "Sljedeća park-šuma", "scratch.imgFor": "destinacija za {name}",
     "share.title": "📤 Podijeli statistiku", "share.namePh": "tvoje ime",
     "share.copy": "🔗 Kopiraj link", "share.share": "📤 Podijeli", "share.saveImg": "🖼 Spremi sliku",
     "share.playOwn": "🌲 Igraj svoju", "share.aForester": "Šumar",
@@ -57,7 +59,11 @@ const STRINGS = {
     "pop.approx": "(približna lokacija)", "pop.checkIn": "Prijavi se", "pop.unCheck": "Poništi", "pop.maps": "Karte ↗",
     "bike.popup": "🚲 {n} bicikala · {f} slobodnih mjesta", "bike.nav": "Navigacija ↗",
     "bike.nearest": "🚲 Najbliži bicikli do {name}: {station} ({d}, {n} bicikala)",
-    "bike.cantLoad": "Ne mogu učitati podatke o biciklima", "bike.openMap": "Prvo otvori Kartu",
+    "bike.cantLoad": "🚲 Ne mogu učitati podatke o biciklima: {reason}", "bike.openMap": "Prvo otvori Kartu",
+    "bike.errOffline": "izgledaš offline", "bike.errNetwork": "mrežna greška (feed nedostupan)",
+    "bike.errTimeout": "isteklo nakon {s} s", "bike.errHttp": "server je vratio HTTP {status}",
+    "bike.errBadData": "feed je vratio neispravne podatke", "bike.errNoCity": "feed nema podatke za Zagreb",
+    "bike.errUnknown": "{detail}",
     "howto": `
       <p><strong>Cilj:</strong> posjeti svih 24 zaštićene <em>park-šume</em> grada Zagreba.</p>
       <ul>
@@ -67,6 +73,7 @@ const STRINGS = {
         <li><strong>🔀 Nova kartica</strong> premiješava ploču. Napredak se sprema automatski.</li>
       </ul>`,
     "changelog": {
+      "0.12.0": ["📤 Podijeli rezultat „Kamo dalje?” — gumb na otkrivenoj karti šalje sliku i tekst kroz nativni izbornik dijeljenja.", "🚲 Jasnija greška kada se bicikli ne učitaju — razlog (offline, mreža, isteklo vrijeme, HTTP status, neispravni podaci, nema Zagreba u feedu) prikazan ispod prekidača.", "🖥️ Raspored za stolne uređaje — Kartica i Karta jedna pored druge na širim ekranima (≥1024 px), dodir polja centrira park na karti."],
       "0.11.0": ["🌐 Prebacivanje jezika — hrvatski / engleski (zadano hrvatski)."],
       "0.10.0": ["🗺️ Granice park-šuma na karti (iz OpenStreetMapa) + veličina svakog parka u hektarima.", "🌳 Statistika istraženih hektara i način napredovanja „Po veličini” gdje veći parkovi više vrijede."],
       "0.9.0": ["🚲 Uključivi sloj nextbike na karti — oznake stanica sa živim brojem bicikala.", "Stanice blizu neposjećenih parkova su istaknute; prikazani su najbliži bicikli do cilja."],
@@ -95,9 +102,11 @@ const STRINGS = {
     "scratch.hintReveal": "Accept to set this as your 🎯 goal, or re-roll.",
     "scratch.here": "🎟  SCRATCH HERE",
     "scratch.reroll": "🔄 Re-roll", "scratch.reveal": "Reveal",
-    "scratch.accept": "🎯 Accept", "scratch.nav": "Navigate ↗",
+    "scratch.accept": "🎯 Accept", "scratch.nav": "Navigate ↗", "scratch.share": "📤 Share",
     "scratch.allTitle": "🏆 All parks visited!", "scratch.allMeta": "You’re a Forest Champion.",
     "scratch.completes": "✅ completes {d}!", "scratch.away": "{d} away",
+    "scratch.shareText": "🎯 {name} is going to {park} ({district}) — next park-šuma ✨",
+    "scratch.imgTitle": "Next park-šuma", "scratch.imgFor": "destiny for {name}",
     "share.title": "📤 Share your stats", "share.namePh": "your name",
     "share.copy": "🔗 Copy link", "share.share": "📤 Share", "share.saveImg": "🖼 Save image",
     "share.playOwn": "🌲 Play your own", "share.aForester": "A forester",
@@ -134,7 +143,11 @@ const STRINGS = {
     "pop.approx": "(approx. location)", "pop.checkIn": "Check in", "pop.unCheck": "Un-check", "pop.maps": "Maps ↗",
     "bike.popup": "🚲 {n} bikes · {f} free racks", "bike.nav": "Navigate ↗",
     "bike.nearest": "🚲 Nearest bikes to {name}: {station} ({d}, {n} bikes)",
-    "bike.cantLoad": "Could not load bike data", "bike.openMap": "Open the Map first",
+    "bike.cantLoad": "🚲 Could not load bike data: {reason}", "bike.openMap": "Open the Map first",
+    "bike.errOffline": "you appear to be offline", "bike.errNetwork": "network error (feed unreachable)",
+    "bike.errTimeout": "timed out after {s} s", "bike.errHttp": "server returned HTTP {status}",
+    "bike.errBadData": "feed returned invalid data", "bike.errNoCity": "feed has no Zagreb data",
+    "bike.errUnknown": "{detail}",
     "howto": `
       <p><strong>Goal:</strong> visit all 24 protected <em>park-šume</em> (forest parks) of Zagreb.</p>
       <ul>
@@ -144,6 +157,7 @@ const STRINGS = {
         <li><strong>🔀 New card</strong> reshuffles the board. Progress saves automatically.</li>
       </ul>`,
     "changelog": {
+      "0.12.0": ["📤 Share your “Where to next?” pick — a button on the revealed card sends a one-park image + text through the native share sheet.", "🚲 Clearer bike-loading errors — the reason (offline, network, timeout, HTTP status, bad data, no Zagreb in feed) now shows under the toggle.", "🖥️ Desktop layout — Card and Map side-by-side on wider screens (≥1024 px); tapping a tile centers that park on the map."],
       "0.11.0": ["🌐 Language switcher — Croatian / English (Croatian by default)."],
       "0.10.0": ["🗺️ Park boundary polygons on the map (from OpenStreetMap) + each park’s size in hectares.", "🌳 Hectares-explored stat, and a “By size” progression mode where bigger parks weigh more toward your level."],
       "0.9.0": ["🚲 Toggleable nextbike layer on the map — live station badges with bike counts.", "Stations near unvisited parks are highlighted, and the nearest bikes to your goal are shown."],

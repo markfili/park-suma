@@ -6,7 +6,7 @@ const FREE = 12;                          // center cell of the 5×5
 const STORAGE_KEY = "parkSumaBingo:v2";
 const SEEN_VERSION_KEY = "parkSumaBingo:seenVersion";
 const CHECKIN_M = 300;                     // GPS check-in radius (metres)
-const APP_VERSION = "0.11.0";             // single source of truth for the version
+const APP_VERSION = "0.12.0";             // single source of truth for the version
 
 // Level ladder — names are i18n keys (tier.<key>); thresholds are counts.
 const TIERS = [
@@ -21,7 +21,7 @@ const TIERS = [
 function tierName(t){ return tr('tier.' + t.key); }
 
 // Versions (newest first) for the "What's new" tab; notes live in i18n.
-const CHANGELOG_VERSIONS = ["0.11.0","0.10.0","0.9.0","0.8.0","0.7.0","0.6.0","0.5.0","0.4.0","0.3.0","0.2.0","0.1.0"];
+const CHANGELOG_VERSIONS = ["0.12.0","0.11.0","0.10.0","0.9.0","0.8.0","0.7.0","0.6.0","0.5.0","0.4.0","0.3.0","0.2.0","0.1.0"];
 
 // ---- DOM ----
 const $ = id => document.getElementById(id);
@@ -158,7 +158,7 @@ function buildCard(fresh){
       pin.title = tr('title.pin');
       pin.addEventListener('click', e => e.stopPropagation());
       cell.appendChild(pin);
-      cell.addEventListener('click', () => attemptCheckin(name));
+      cell.addEventListener('click', () => { focusParkOnMap(name); attemptCheckin(name); });
     }
     board.appendChild(cell); cells.push(cell);
   }
@@ -333,6 +333,18 @@ function popupHtml(p){
   const link = `<a class="pop-link" href="${mapsLink(p.name)}" target="_blank" rel="noopener">${tr('pop.maps')}</a>`;
   return `<b>${p.name}</b>${approx}<br><span class="pop-meta">${p.district}${size} · ${status}${dist}</span><br>${btn}${link}`;
 }
+// Desktop-only synergy: tapping a card tile pans + opens that park's popup on the map.
+// Mobile no-ops because the map is hidden behind the Card/Map toggle there.
+const DESKTOP_MQ = window.matchMedia('(min-width: 1024px)');
+function focusParkOnMap(name){
+  if (!DESKTOP_MQ.matches) return;
+  if (!map || !mapReady) return;
+  const p = BY_NAME[name]; if (!p) return;
+  map.flyTo([p.lat, p.lon], 14, { duration: 0.6 });
+  const m = markers[name];
+  if (m) m.bindPopup(popupHtml(p)).openPopup();
+}
+
 function refreshMapStyles(){
   if (!mapReady) return;
   PARKS.forEach(p => { if (markers[p.name]) markers[p.name].setStyle(markerStyle(p.name)); });

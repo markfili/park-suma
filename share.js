@@ -38,7 +38,12 @@
 
   // ---- stats image (canvas) ----
   function drawCard(canvas, name, set) {
-    const x = canvas.getContext('2d'), W = canvas.width, H = canvas.height;
+    // Render at 2× (1200×630, the standard social-card size) for a crisp
+    // preview and export; layout below is authored in logical 600×315 units.
+    const scale = 2, W = 600, H = 315;
+    canvas.width = W * scale; canvas.height = H * scale;
+    const x = canvas.getContext('2d');
+    x.setTransform(scale, 0, 0, scale, 0, 0);
     const g = x.createLinearGradient(0, 0, W, H);
     g.addColorStop(0, '#0b3d2e'); g.addColorStop(1, '#0a2c22');
     x.fillStyle = g; x.fillRect(0, 0, W, H);

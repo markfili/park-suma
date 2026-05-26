@@ -151,6 +151,8 @@ button.ghost.danger { color: #ff9b8a; border-color: #6e3b32; }
 .legend { font-size: .72rem; margin-top: 8px; text-align: center; }
 #bikesToggle { margin-top: 10px; }
 .bikes-hint { font-size: .74rem; margin-top: 8px; text-align: center; min-height: 1em; color: var(--gold); }
+.bikes-err  { font-size: .74rem; margin-top: 6px; text-align: center; color: #ff9b8a; }
+.bikes-err:empty { display: none; }
 
 /* nextbike station badges (Leaflet divIcon) */
 .bike-badge {
@@ -265,6 +267,9 @@ footer { color: var(--mint-dim); font-size: .72rem; margin-top: 18px; text-align
   position: relative; background: var(--bg); border: 2px solid var(--line);
   border-radius: 18px; padding: 22px; width: min(92vw, 380px); text-align: center;
 }
+/* share modal is wider with slimmer side padding so the stats image preview
+   isn't cramped (override must follow the shared .*-card rule above). */
+.share-card { width: min(96vw, 480px); padding-left: 14px; padding-right: 14px; }
 .scratch-card h3, .help-card h3 { margin: 0 0 12px; }
 .modal-x {
   position: absolute; top: 8px; right: 10px; padding: 4px;
@@ -307,3 +312,23 @@ button:disabled { opacity: .45; cursor: default; }
 .cl h4 { margin: .4em 0 .2em; color: var(--mint-dim); font-size: .82rem; }
 .cl.cur h4 { color: var(--gold); }
 .cl ul { margin: .1em 0; }
+
+/* ---------- desktop layout (>= 1024px) ----------
+   Mobile-first single column is left intact below this breakpoint. Above it,
+   header/main/districts/footer share a wider cap and Card+Map become a
+   side-by-side grid so both views are first-class. The Card/Map toggle is
+   hidden because both views are always visible. */
+@media (min-width: 1024px) {
+  header, main, .districts, footer { width: min(96vw, 1100px); }
+  main {
+    display: grid;
+    grid-template-columns: 1fr 1.15fr; /* map slightly wider — polygons need room */
+    gap: 18px;
+    align-items: start;
+  }
+  .view { display: flex; }       /* show both regardless of .active */
+  .toggle { display: none; }     /* segmented Card/Map toggle is redundant here */
+  #map { height: min(72vh, 720px); }
+  .board { max-width: 500px; align-self: center; }
+  .controls { justify-content: center; }
+}

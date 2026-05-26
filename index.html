@@ -65,6 +65,7 @@
       <div id="map"></div>
       <div class="legend muted" data-i18n="legend">🟢 posjećeno · ⚪ još ne · 🟡 cilj · 🔵 ti · dodirni oznaku za prijavu</div>
       <button id="bikesToggle" class="ghost" data-i18n="bikes.show">🚲 Prikaži bicikle</button>
+      <div class="bikes-err" id="bikesErr" role="status" aria-live="polite"></div>
       <div class="bikes-hint muted" id="bikesHint"></div>
     </section>
   </main>
@@ -74,7 +75,7 @@
   <footer>
     <span data-i18n="footer.tagline">24 zaštićene park-šume grada Zagreba</span> · 🟢 greengo demo ·
     <span id="gpsStatus"></span><br>
-    <span class="ver"><span id="appVer">v0.11.0</span> <span id="sha"></span></span>
+    <span class="ver"><span id="appVer">v0.12.0</span> <span id="sha"></span></span>
     <span class="lang" id="langToggle"><button data-lang="hr">HR</button><button data-lang="en">EN</button></span>
   </footer>
 
@@ -102,6 +103,7 @@
         <button id="scReroll" class="ghost" data-i18n="scratch.reroll">🔄 Ponovi</button>
         <button id="scRevealBtn" class="ghost" data-i18n="scratch.reveal">Otkrij</button>
         <a id="scNav" class="pop-btn" href="#" target="_blank" rel="noopener" style="display:none" data-i18n="scratch.nav">Navigacija ↗</a>
+        <button id="scShare" class="ghost" style="display:none" data-i18n="scratch.share">📤 Podijeli</button>
         <button id="scAccept" disabled data-i18n="scratch.accept">🎯 Prihvati</button>
       </div>
     </div>
@@ -126,7 +128,7 @@
       <h3 data-i18n="share.title">📤 Podijeli statistiku</h3>
       <label class="share-name">👤 <input id="shareName" data-i18n-ph="share.namePh" placeholder="tvoje ime" maxlength="24" autocomplete="off"></label>
       <div class="share-stats" id="shareStats"></div>
-      <canvas id="shareCanvas" width="600" height="315"></canvas>
+      <canvas id="shareCanvas" width="1200" height="630"></canvas>
       <div class="share-actions">
         <button id="shareCopy" class="ghost" data-i18n="share.copy">🔗 Kopiraj link</button>
         <button id="shareNative" class="ghost" data-i18n="share.share">📤 Podijeli</button>

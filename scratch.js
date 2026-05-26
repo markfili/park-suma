@@ -8,6 +8,7 @@
   const acceptBtn = document.getElementById('scAccept');
   const rerollBtn = document.getElementById('scReroll');
   const revealBtn = document.getElementById('scRevealBtn');
+  const shareBtn  = document.getElementById('scShare');
   const nav      = document.getElementById('scNav');
   const ctx = foil.getContext('2d', { willReadFrequently: true });
 
@@ -28,7 +29,7 @@
 
   function renderAllVisited() {
     foil.style.display = 'none';
-    [acceptBtn, rerollBtn, revealBtn].forEach(el => el.style.display = 'none');
+    [acceptBtn, rerollBtn, revealBtn, shareBtn].forEach(el => el.style.display = 'none');
     nav.style.display = 'none';
     hint.textContent = '';
     reveal.innerHTML = '<div class="rv-name">' + tr('scratch.allTitle') + '</div>' +
@@ -98,7 +99,66 @@
     setRevealedUI(true);
     hint.textContent = tr('scratch.hintReveal');
   }
-  function setRevealedUI(on) { acceptBtn.disabled = !on; nav.style.display = on ? '' : 'none'; }
+  function setRevealedUI(on) {
+    acceptBtn.disabled = !on;
+    nav.style.display = on ? '' : 'none';
+    shareBtn.style.display = on ? '' : 'none';
+  }
+
+  // ---- share (text + PNG, mirrors share.js fallback ladder) ----
+  function shareUrl() { return location.origin + location.pathname; }
+  function shareName() { return (state.name || '').trim() || tr('share.aForester'); }
+  function shareText() {
+    return tr('scratch.shareText', { name: shareName(), park: pick.name, district: pick.district })
+      + ' ' + shareUrl();
+  }
+  // One-park hero card; same 600×315 @2× layout grammar as share.js drawCard.
+  function drawShareCard(canvas) {
+    const scale = 2, W = 600, H = 315;
+    canvas.width = W * scale; canvas.height = H * scale;
+    const x = canvas.getContext('2d');
+    x.setTransform(scale, 0, 0, scale, 0, 0);
+    const g = x.createLinearGradient(0, 0, W, H);
+    g.addColorStop(0, '#0b3d2e'); g.addColorStop(1, '#0a2c22');
+    x.fillStyle = g; x.fillRect(0, 0, W, H);
+    x.textAlign = 'center';
+    x.fillStyle = '#7fcfa3'; x.font = 'bold 18px system-ui, sans-serif';
+    x.fillText('🎟  ' + tr('scratch.imgTitle'), W / 2, 44);
+    x.fillStyle = '#ffd56b'; x.font = 'bold 54px system-ui, sans-serif';
+    x.fillText(pick.name, W / 2, 130);
+    x.fillStyle = '#b8f5d0'; x.font = '20px system-ui, sans-serif';
+    x.fillText(pick.district, W / 2, 168);
+    x.fillStyle = '#7fcfa3'; x.font = '20px system-ui, sans-serif';
+    x.fillText('✨ ' + tr('scratch.imgFor', { name: shareName() }), W / 2, 210);
+    if (typeof completesDistrict === 'function' && completesDistrict(pick.name)) {
+      x.fillStyle = '#2fae6f'; x.font = 'bold 16px system-ui, sans-serif';
+      x.fillText(tr('scratch.completes', { d: pick.district }), W / 2, 246);
+    }
+    x.fillStyle = '#4e7a66'; x.font = '14px system-ui, sans-serif';
+    x.fillText('markfili.github.io/park-suma · v' + APP_VERSION, W / 2, H - 16);
+  }
+
+  shareBtn.addEventListener('click', () => {
+    if (!pick) return;
+    const canvas = document.createElement('canvas');
+    drawShareCard(canvas);
+    const text = shareText();
+    canvas.toBlob(blob => {
+      if (!blob) { return; }
+      const file = new File([blob], 'park-suma-next.png', { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], title: 'Park-Šuma Bingo', text }).catch(() => {});
+      } else if (navigator.share) {
+        navigator.share({ title: 'Park-Šuma Bingo', text }).catch(() => {});
+      } else {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = 'park-suma-next.png'; a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        if (navigator.clipboard) navigator.clipboard.writeText(text).catch(() => {});
+        toast(tr('share.imgSaved'));
+      }
+    }, 'image/png');
+  });
 
   // ---- events ----
   foil.addEventListener('mousedown', start);
