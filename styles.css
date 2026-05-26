@@ -290,6 +290,23 @@ button:disabled { opacity: .45; cursor: default; }
 .rv-meta { font-size: .8rem; color: var(--mint-dim); }
 .rv-badge { margin-top: 4px; font-size: .78rem; font-weight: 700; color: #3a2c00; background: var(--gold); padding: 3px 8px; border-radius: 999px; }
 .foil { position: absolute; inset: 0; cursor: grab; touch-action: none; }
+/* Small static-feel preview map that slides in once the foil is scratched off.
+   Width-only border so the 0 → 130px height grow doesn't paint a 1px line on
+   the collapsed state. Pointer events disabled — it's read-only eye candy. */
+.scratch-map {
+  width: 100%; height: 0; margin-top: 0;
+  border-radius: 12px; overflow: hidden;
+  border: 0 solid var(--line); background: var(--bg2);
+  transition: height .35s ease, margin-top .35s ease, border-width 0s linear .35s;
+  pointer-events: none;
+}
+.scratch-map.show {
+  height: 130px; margin-top: 10px; border-width: 1px;
+  transition: height .35s ease, margin-top .35s ease, border-width 0s linear 0s;
+}
+/* Leaflet's default white tile bg shows for a beat before tiles arrive — match
+   the card's deep-green so it never flashes white on reveal. */
+.scratch-map .leaflet-container { background: var(--bg2); }
 .scratch-hint { font-size: .78rem; margin: 10px 0; min-height: 1em; }
 .scratch-actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; align-items: center; }
 .scratch-actions .pop-btn { margin: 0; }

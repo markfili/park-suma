@@ -10,9 +10,11 @@
   const revealBtn = document.getElementById('scRevealBtn');
   const shareBtn  = document.getElementById('scShare');
   const nav      = document.getElementById('scNav');
+  const mapEl    = document.getElementById('scMap');
   const ctx = foil.getContext('2d', { willReadFrequently: true });
 
   let pick = null, revealed = false, drawing = false, moves = 0;
+  let scMap = null, scMarker = null;
 
   function open() {
     pick = (typeof pickNext === 'function') ? pickNext() : null;
@@ -21,19 +23,53 @@
     [foil, acceptBtn, rerollBtn, revealBtn].forEach(el => el.style.display = '');
     revealed = false; moves = 0;
     setRevealedUI(false);
+    hideMap();
     hint.textContent = tr('scratch.hintStart');
     renderReveal();
     requestAnimationFrame(() => { sizeFoil(); drawFoil(); });
   }
-  function close() { scratch.classList.remove('show'); }
+  function close() { scratch.classList.remove('show'); hideMap(); }
 
   function renderAllVisited() {
     foil.style.display = 'none';
     [acceptBtn, rerollBtn, revealBtn, shareBtn].forEach(el => el.style.display = 'none');
     nav.style.display = 'none';
+    hideMap();
     hint.textContent = '';
     reveal.innerHTML = '<div class="rv-name">' + tr('scratch.allTitle') + '</div>' +
                        '<div class="rv-meta">' + tr('scratch.allMeta') + '</div>';
+  }
+
+  // Small read-only Leaflet preview that appears below the foil on reveal.
+  // Marker uses the same gold/amber palette as app.js's goal pin so the
+  // visual language carries over to the main map once Accept is tapped.
+  function showMap(p) {
+    if (typeof L === 'undefined') return;
+    if (!scMap) {
+      scMap = L.map(mapEl, {
+        zoomControl: false, attributionControl: false,
+        dragging: false, scrollWheelZoom: false, doubleClickZoom: false,
+        touchZoom: false, boxZoom: false, keyboard: false,
+        tap: false, trackResize: false
+      }).setView([p.lat, p.lon], 14);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        { maxZoom: 19 }).addTo(scMap);
+    } else {
+      scMap.setView([p.lat, p.lon], 14);
+    }
+    if (scMarker) { scMarker.remove(); scMarker = null; }
+    scMarker = L.circleMarker([p.lat, p.lon],
+      { radius: 11, weight: 3, color: '#ffd56b', fillColor: '#caa23a', fillOpacity: 0.95 }
+    ).addTo(scMap);
+    mapEl.classList.add('show');
+    mapEl.setAttribute('aria-hidden', 'false');
+    // Container is 0×0 until the .show transition starts; let layout settle
+    // before Leaflet asks tiles for the real size.
+    setTimeout(() => { if (scMap) scMap.invalidateSize(); }, 360);
+  }
+  function hideMap() {
+    mapEl.classList.remove('show');
+    mapEl.setAttribute('aria-hidden', 'true');
   }
 
   function renderReveal() {
@@ -98,6 +134,7 @@
     ctx.fillRect(0, 0, w, h);
     setRevealedUI(true);
     hint.textContent = tr('scratch.hintReveal');
+    if (pick) showMap(pick);
   }
   function setRevealedUI(on) {
     acceptBtn.disabled = !on;

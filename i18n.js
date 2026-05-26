@@ -73,6 +73,7 @@ const STRINGS = {
         <li><strong>🔀 Nova kartica</strong> premiješava ploču. Napredak se sprema automatski.</li>
       </ul>`,
     "changelog": {
+      "0.13.0": ["🗺 Minijaturna karta na grebalici — kad otkriješ park, pojavi se mala karta s oznakom njegove lokacije."],
       "0.12.0": ["📤 Podijeli rezultat „Kamo dalje?” — gumb na otkrivenoj karti šalje sliku i tekst kroz nativni izbornik dijeljenja.", "🚲 Jasnija greška kada se bicikli ne učitaju — razlog (offline, mreža, isteklo vrijeme, HTTP status, neispravni podaci, nema Zagreba u feedu) prikazan ispod prekidača.", "🖥️ Raspored za stolne uređaje — Kartica i Karta jedna pored druge na širim ekranima (≥1024 px), dodir polja centrira park na karti."],
       "0.11.0": ["🌐 Prebacivanje jezika — hrvatski / engleski (zadano hrvatski)."],
       "0.10.0": ["🗺️ Granice park-šuma na karti (iz OpenStreetMapa) + veličina svakog parka u hektarima.", "🌳 Statistika istraženih hektara i način napredovanja „Po veličini” gdje veći parkovi više vrijede."],
@@ -157,6 +158,7 @@ const STRINGS = {
         <li><strong>🔀 New card</strong> reshuffles the board. Progress saves automatically.</li>
       </ul>`,
     "changelog": {
+      "0.13.0": ["🗺 Mini-map on the scratch card — when you reveal the park, a small map pops in with a marker at its location."],
       "0.12.0": ["📤 Share your “Where to next?” pick — a button on the revealed card sends a one-park image + text through the native share sheet.", "🚲 Clearer bike-loading errors — the reason (offline, network, timeout, HTTP status, bad data, no Zagreb in feed) now shows under the toggle.", "🖥️ Desktop layout — Card and Map side-by-side on wider screens (≥1024 px); tapping a tile centers that park on the map."],
       "0.11.0": ["🌐 Language switcher — Croatian / English (Croatian by default)."],
       "0.10.0": ["🗺️ Park boundary polygons on the map (from OpenStreetMap) + each park’s size in hectares.", "🌳 Hectares-explored stat, and a “By size” progression mode where bigger parks weigh more toward your level."],
