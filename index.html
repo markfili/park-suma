@@ -56,6 +56,7 @@
       <div class="controls">
         <button id="new" data-i18n="btn.newCard">🔀 Nova kartica</button>
         <button id="whereNext" class="ghost" data-i18n="btn.whereNext">🎟 Kamo dalje?</button>
+        <button id="togetherBtn" class="ghost" data-i18n="btn.together">🤝 Zajedno</button>
         <button id="locate" class="ghost" data-i18n="btn.locate">📍 Lociraj me</button>
         <button id="reset" class="ghost danger" data-i18n="btn.reset">♻️ Poništi</button>
       </div>
@@ -75,7 +76,7 @@
   <footer>
     <span data-i18n="footer.tagline">24 zaštićene park-šume grada Zagreba</span> · 🟢 greengo demo ·
     <span id="gpsStatus"></span><br>
-    <span class="ver"><span id="appVer">v0.16.0</span> <span id="sha"></span></span>
+    <span class="ver"><span id="appVer">v0.17.0</span> <span id="sha"></span></span>
     <span class="lang" id="langToggle"><button data-lang="hr">HR</button><button data-lang="en">EN</button></span>
   </footer>
 
@@ -184,6 +185,40 @@
     </div>
   </div>
 
+  <!-- play together (P2P live leaderboard) -->
+  <div class="together" id="together">
+    <div class="together-card">
+      <button class="modal-x" id="tgX" aria-label="✕">✕</button>
+      <h3 data-i18n="together.title">🤝 Igrajte zajedno</h3>
+
+      <!-- lobby: not yet in a room -->
+      <div id="tgLobby">
+        <p class="together-intro muted" data-i18n="together.intro">Otvori sobu i podijeli kôd s prijateljima — gledajte napredak jedni drugih uživo. Veza ide izravno među preglednicima, bez servera.</p>
+        <label class="share-name">👤 <input id="tgName" data-i18n-ph="share.namePh" placeholder="tvoje ime" maxlength="24" autocomplete="off"></label>
+        <div class="together-actions">
+          <button id="tgCreate" data-i18n="together.create">➕ Otvori sobu</button>
+        </div>
+        <div class="together-join">
+          <input id="tgCode" data-i18n-ph="together.codePh" placeholder="KOD" maxlength="4" autocomplete="off" autocapitalize="characters" inputmode="latin">
+          <button id="tgJoin" class="ghost" data-i18n="together.join">Pridruži se</button>
+        </div>
+        <div class="together-status" id="tgStatus" role="status" aria-live="polite"></div>
+      </div>
+
+      <!-- room: connected -->
+      <div id="tgRoom" hidden>
+        <div class="together-room">
+          <span data-i18n="together.roomCode">Kôd sobe:</span>
+          <button class="together-codechip" id="tgCodeChip" data-i18n-title="together.copyCode" title="Kopiraj kôd">····</button>
+        </div>
+        <div class="together-roster" id="tgRoster"></div>
+        <div class="together-actions">
+          <button id="tgLeave" class="ghost danger" data-i18n="together.leave">🚪 Izađi</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
   <!-- Leaflet, then data, then i18n, then app + modules — after the DOM exists. -->
@@ -201,7 +236,7 @@
       load('parks.js', function () {
         load('i18n.js', function () {
           load('app.js', function () {
-            load('scratch.js', function () { load('share.js', function () { load('bikes.js'); }); });
+            load('scratch.js', function () { load('share.js', function () { load('bikes.js', function () { load('together.js'); }); }); });
           });
         });
       });

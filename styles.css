@@ -245,6 +245,33 @@ footer { color: var(--mint-dim); font-size: .72rem; margin-top: 18px; text-align
 .sv-dot { width: 12px; height: 12px; border-radius: 50%; background: #274d3e; }
 .sv-dot.on { background: var(--tile-marked); }
 
+/* ---- play together (P2P) ---- */
+.together-card h3 { margin: 0 0 12px; }
+.together-intro { font-size: .82rem; line-height: 1.45; margin: 0 0 14px; }
+.together-actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
+.together-join { display: flex; gap: 8px; justify-content: center; margin-top: 10px; }
+.together-join input {
+  font: inherit; font-weight: 700; text-align: center; text-transform: uppercase; letter-spacing: .3em;
+  background: var(--bg2); color: var(--gold); border: 1px solid var(--line);
+  border-radius: 10px; padding: 8px 12px; width: 120px;
+}
+.together-status { min-height: 1.1em; font-size: .8rem; color: var(--mint-dim); margin-top: 12px; }
+.together-status.err { color: #ff9b8a; }
+.together-room { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 14px; font-size: .85rem; color: var(--mint-dim); }
+.together-codechip {
+  font: inherit; font-weight: 800; font-size: 1.25rem; letter-spacing: .35em;
+  background: var(--bg2); color: var(--gold); border: 1px solid var(--line);
+  border-radius: 10px; padding: 6px 4px 6px 14px; cursor: pointer;
+}
+.together-roster { display: flex; flex-direction: column; gap: 8px; margin: 4px 0 6px; text-align: left; }
+.tg-player { display: flex; align-items: center; gap: 8px; }
+.tg-player.me .tg-name { color: var(--mint); font-weight: 700; }
+.tg-dot { width: 12px; height: 12px; border-radius: 50%; flex: none; }
+.tg-name { flex: 1; min-width: 0; font-size: .85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tg-bar { width: 64px; height: 7px; flex: none; background: var(--bg2); border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+.tg-bar-fill { display: block; height: 100%; background: linear-gradient(90deg, var(--tile-marked), var(--gold)); }
+.tg-count { flex: none; min-width: 58px; text-align: right; font-size: .78rem; color: var(--gold); font-variant-numeric: tabular-nums; }
+
 /* ---- goal ---- */
 .goal-chip { color: var(--gold); font-weight: 600; }
 .cell.goal { box-shadow: 0 0 0 2px var(--gold) inset; animation: goalpulse 1.5s ease-in-out infinite; }
@@ -254,13 +281,13 @@ footer { color: var(--mint-dim); font-size: .72rem; margin-top: 18px; text-align
 }
 
 /* ---- modal overlays (scratch + help + dist) ---- */
-.scratch, .help, .share, .dist {
+.scratch, .help, .share, .dist, .together {
   position: fixed; inset: 0; display: none;
   align-items: center; justify-content: center;
   background: rgba(4,20,15,.74); backdrop-filter: blur(3px); z-index: 1000;
 }
-.scratch.show, .help.show, .share.show, .dist.show { display: flex; animation: fade .3s ease; }
-.scratch-card, .help-card, .share-card, .dist-card {
+.scratch.show, .help.show, .share.show, .dist.show, .together.show { display: flex; animation: fade .3s ease; }
+.scratch-card, .help-card, .share-card, .dist-card, .together-card {
   position: relative; background: var(--bg); border: 2px solid var(--line);
   border-radius: 18px; padding: 22px; width: min(92vw, 380px); text-align: center;
 }
