@@ -112,6 +112,78 @@
   share.addEventListener('click', e => { if (e.target === share) closeCompose(); });
   document.getElementById('shareBtn').addEventListener('click', openCompose);
 
+  // ---- incoming-link: someone's "going next" pick ----
+  // Mirrors the stats-view flow below: a hash with g=<idx into NAMES> pops a
+  // small modal at boot with the park the sender is heading for + a one-tap
+  // "make this my goal" action. Optional u=<name> labels the sender.
+  let goingName = null, goingPark = null, gvMap = null, gvMarker = null;
+  const gvEl = document.getElementById('goingView');
+  const gvMapEl = document.getElementById('gvMap');
+  const gvAccept = document.getElementById('gvAccept');
+  const gvDismiss = document.getElementById('gvDismiss');
+
+  function scrubHash() {
+    history.replaceState(null, '', location.pathname + location.search);
+  }
+  function gvShowMap(p) {
+    if (typeof L === 'undefined' || !gvMapEl) return;
+    if (!gvMap) {
+      gvMap = L.map(gvMapEl, {
+        zoomControl: false, attributionControl: false,
+        dragging: false, scrollWheelZoom: false, doubleClickZoom: false,
+        touchZoom: false, boxZoom: false, keyboard: false,
+        tap: false, trackResize: false
+      }).setView([p.lat, p.lon], 14);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        { maxZoom: 19 }).addTo(gvMap);
+    } else {
+      gvMap.setView([p.lat, p.lon], 14);
+    }
+    if (gvMarker) { gvMarker.remove(); gvMarker = null; }
+    gvMarker = L.circleMarker([p.lat, p.lon],
+      { radius: 11, weight: 3, color: '#ffd56b', fillColor: '#caa23a', fillOpacity: 0.95 }
+    ).addTo(gvMap);
+    gvMapEl.classList.add('show');
+    gvMapEl.setAttribute('aria-hidden', 'false');
+    setTimeout(() => { if (gvMap) gvMap.invalidateSize(); }, 360);
+  }
+  function openGoing(name, park) {
+    const p = BY_NAME[park]; if (!p) return;
+    goingName = name; goingPark = park;
+    const senderLabel = (name || '').trim() || tr('share.aForester');
+    document.getElementById('gvTitle').textContent = tr('going.title', { name: senderLabel, park });
+    const metaKey = p.ha ? 'going.meta' : 'going.metaNoHa';
+    document.getElementById('gvMeta').textContent = tr(metaKey, { district: p.district, ha: p.ha || 0 });
+    // Action-button state reflects how this park sits in the receiver's progress.
+    const visited = typeof isVisited === 'function' && isVisited(park);
+    const isMyGoal = state && state.goal === park;
+    if (visited) {
+      gvAccept.disabled = true; gvAccept.textContent = tr('going.alreadyVisited');
+    } else if (isMyGoal) {
+      gvAccept.disabled = true; gvAccept.textContent = tr('going.alreadySet');
+    } else {
+      gvAccept.disabled = false; gvAccept.textContent = tr('going.accept');
+    }
+    gvDismiss.textContent = tr('going.dismiss');
+    gvEl.classList.add('show');
+    gvShowMap(p);
+  }
+  function closeGoing() {
+    gvEl.classList.remove('show');
+    if (gvMapEl) { gvMapEl.classList.remove('show'); gvMapEl.setAttribute('aria-hidden', 'true'); }
+    scrubHash();
+  }
+  gvAccept.addEventListener('click', () => {
+    if (gvAccept.disabled) { closeGoing(); return; }
+    if (goingPark && typeof setGoal === 'function') {
+      setGoal(goingPark);
+      if (typeof toast === 'function') toast(tr('toast.goalSet', { name: goingPark }));
+    }
+    closeGoing();
+  });
+  gvDismiss.addEventListener('click', closeGoing);
+  gvEl.addEventListener('click', e => { if (e.target === gvEl) closeGoing(); });
+
   // ---- incoming-link stats view ----
   let viewName = null, viewSet = null;
   function openView(name, set) {
@@ -131,12 +203,23 @@
 
   try {
     const params = new URLSearchParams(location.hash.replace(/^#/, ''));
-    if (params.has('s')) openView(params.get('u') || '', decodeSet(params.get('s')));
+    const u = params.get('u') || '';
+    const g = params.get('g');
+    if (g != null) {
+      // g=<idx into NAMES>. Out-of-range / malformed → silently ignore (matches
+      // the surrounding try/catch posture). If both g and s are present, the
+      // going-next pick wins for v1; combined view is a possible follow-up.
+      const idx = parseInt(g, 10);
+      if (Number.isInteger(idx) && idx >= 0 && idx < NAMES.length) openGoing(u, NAMES[idx]);
+    } else if (params.has('s')) {
+      openView(u, decodeSet(params.get('s')));
+    }
   } catch (e) { /* ignore malformed link */ }
 
   // re-render in the new language
   window.shareRelabel = function () {
     if (share.classList.contains('show')) refreshCompose();
     if (document.getElementById('shareView').classList.contains('show') && viewSet) openView(viewName, viewSet);
+    if (gvEl.classList.contains('show') && goingPark) openGoing(goingName, goingPark);
   };
 })();

@@ -47,6 +47,13 @@ const STRINGS = {
     "dist.progress": "{v} / {t} posjećeno",
     "dist.swept": "✓ Sva osvojena · {t}/{t}",
     "dist.rowApprox": "(približna lokacija)",
+    "going.title": "🎟 {name} ide u {park}",
+    "going.meta": "{district} · {ha} ha",
+    "going.metaNoHa": "{district}",
+    "going.accept": "🎯 Postavi i meni za cilj",
+    "going.alreadySet": "🎯 Već ti je cilj",
+    "going.alreadyVisited": "✅ Već si bio ovdje",
+    "going.dismiss": "🌲 Igraj svoju",
     "gps.off": "GPS isključen — na povjerenje", "gps.on": "GPS uključen — prijava ≤{m} m",
     "toast.checkedIn": "Prijavljen u {name}! ✅",
     "toast.tooFar": "{d} od {name} — priđi na ≤{m} m za prijavu",
@@ -79,6 +86,7 @@ const STRINGS = {
         <li><strong>🔀 Nova kartica</strong> premiješava ploču. Napredak se sprema automatski.</li>
       </ul>`,
     "changelog": {
+      "0.16.0": ["🎟 Kad otvoriš tuđu „Kamo dalje?” poveznicu — pojavi se modal s parkom koji prijatelj sprema posjetiti i gumb da i tebi postane cilj jednim dodirom."],
       "0.15.0": ["🏘️ Dodirni značku četvrti pod karticom i otvorit će se popis park-šuma u toj četvrti s oznakom posjećenosti; klik na park ga centrira na karti.", "🧹 Uklonjena ikona 📍 s polja na kartici — polje je sad cijelo dostupno za prijavu."],
       "0.14.0": ["🎰 Slot za odluku — u „Kamo dalje?” prebaci se na Spinaj i pokreni tri kotača, sva tri staju na isti park."],
       "0.13.0": ["🗺 Minijaturna karta na grebalici — kad otkriješ park, pojavi se mala karta s oznakom njegove lokacije."],
@@ -140,6 +148,13 @@ const STRINGS = {
     "dist.progress": "{v} / {t} visited",
     "dist.swept": "✓ All swept · {t}/{t}",
     "dist.rowApprox": "(approx. location)",
+    "going.title": "🎟 {name} is heading for {park}",
+    "going.meta": "{district} · {ha} ha",
+    "going.metaNoHa": "{district}",
+    "going.accept": "🎯 Make this my goal",
+    "going.alreadySet": "🎯 Already your goal",
+    "going.alreadyVisited": "✅ Already visited",
+    "going.dismiss": "🌲 Play your own",
     "gps.off": "GPS off — honor mode", "gps.on": "GPS on — check-ins gated to ≤{m} m",
     "toast.checkedIn": "Checked in at {name}! ✅",
     "toast.tooFar": "You’re {d} from {name} — get within {m} m to check in",
@@ -172,6 +187,7 @@ const STRINGS = {
         <li><strong>🔀 New card</strong> reshuffles the board. Progress saves automatically.</li>
       </ul>`,
     "changelog": {
+      "0.16.0": ["🎟 Opening a friend's “Where to next?” link now pops a modal with the park they're heading for and a one-tap button to make it your goal too."],
       "0.15.0": ["🏘️ Tap a district chip under the card to open a list of the park-šume in that district with visited markers; clicking a park centers it on the map.", "🧹 Removed the 📍 icon from card tiles — the whole tile is now the check-in target."],
       "0.14.0": ["🎰 Slot-machine picker — inside “Where to next?” toggle to Spin and three reels stop on your jackpot park."],
       "0.13.0": ["🗺 Mini-map on the scratch card — when you reveal the park, a small map pops in with a marker at its location."],

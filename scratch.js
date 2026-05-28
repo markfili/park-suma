@@ -307,7 +307,15 @@
   }
 
   // ---- share (text + PNG, mirrors share.js fallback ladder) ----
-  function shareUrl() { return location.origin + location.pathname; }
+  // Hash carries who's sharing (u=name) + which park they're heading for
+  // (g=index into NAMES). share.js parses this at boot and pops the going-next
+  // modal so the recipient can adopt the same park as their own goal in one tap.
+  function shareUrl() {
+    const name = encodeURIComponent((state.name || '').trim());
+    const idx = pick ? NAMES.indexOf(pick.name) : -1;
+    const base = location.origin + location.pathname;
+    return idx >= 0 ? base + '#u=' + name + '&g=' + idx : base;
+  }
   function shareName() { return (state.name || '').trim() || tr('share.aForester'); }
   function shareText() {
     return tr('scratch.shareText', { name: shareName(), park: pick.name, district: pick.district })

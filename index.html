@@ -75,7 +75,7 @@
   <footer>
     <span data-i18n="footer.tagline">24 zaštićene park-šume grada Zagreba</span> · 🟢 greengo demo ·
     <span id="gpsStatus"></span><br>
-    <span class="ver"><span id="appVer">v0.15.0</span> <span id="sha"></span></span>
+    <span class="ver"><span id="appVer">v0.16.0</span> <span id="sha"></span></span>
     <span class="lang" id="langToggle"><button data-lang="hr">HR</button><button data-lang="en">EN</button></span>
   </footer>
 
@@ -155,6 +155,19 @@
         <button id="shareCopy" class="ghost" data-i18n="share.copy">🔗 Kopiraj link</button>
         <button id="shareNative" class="ghost" data-i18n="share.share">📤 Podijeli</button>
         <button id="shareImg" data-i18n="share.saveImg">🖼 Spremi sliku</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- share: someone's "going next" pick -->
+  <div class="share" id="goingView">
+    <div class="share-card">
+      <h3 id="gvTitle"></h3>
+      <div class="share-stats" id="gvMeta"></div>
+      <div class="scratch-map" id="gvMap" aria-hidden="true"></div>
+      <div class="share-actions">
+        <button id="gvDismiss" class="ghost" data-i18n="going.dismiss">🌲 Igraj svoju</button>
+        <button id="gvAccept" data-i18n="going.accept">🎯 Postavi i meni za cilj</button>
       </div>
     </div>
   </div>
