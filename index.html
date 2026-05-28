@@ -76,7 +76,7 @@
   <footer>
     <span data-i18n="footer.tagline">24 zaštićene park-šume grada Zagreba</span> · 🟢 greengo demo ·
     <span id="gpsStatus"></span><br>
-    <span class="ver"><span id="appVer">v0.17.0</span> <span id="sha"></span></span>
+    <span class="ver"><span id="appVer">v0.18.0</span> <span id="sha"></span></span>
     <span class="lang" id="langToggle"><button data-lang="hr">HR</button><button data-lang="en">EN</button></span>
   </footer>
 
@@ -236,7 +236,7 @@
       load('parks.js', function () {
         load('i18n.js', function () {
           load('app.js', function () {
-            load('scratch.js', function () { load('share.js', function () { load('bikes.js', function () { load('together.js'); }); }); });
+            load('scratch.js', function () { load('share.js', function () { load('bikes.js', function () { load('together.js', function () { load('sync.js'); }); }); }); });
           });
         });
       });

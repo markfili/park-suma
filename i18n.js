@@ -78,6 +78,7 @@ const STRINGS = {
     "toast.locFail": "Lokacija nedostupna — na povjerenje (dodirni za oznaku)",
     "toast.noGeo": "Geolokacija nije podržana — ostajem na povjerenje",
     "toast.reset": "Napredak poništen 🌱", "toast.goalSet": "🎯 Cilj postavljen: {name}",
+    "sync.updated": "🔄 Ažurirano iz drugog taba",
     "reset.confirm": "Poništiti sav napredak?\n\nObrisat će se svi posjećeni parkovi, cilj i osvojene razine. Nije moguće poništiti.",
     "cel.destinyTitle": "Cilj dosegnut!", "cel.destinyMsg": "Stigao si do svog cilja: {name}!",
     "cel.bingoMsg": "Povezao si 5 park-šuma u nizu — bonus!",
@@ -103,6 +104,7 @@ const STRINGS = {
         <li><strong>🔀 Nova kartica</strong> premiješava ploču. Napredak se sprema automatski.</li>
       </ul>`,
     "changelog": {
+      "0.18.0": ["🔄 Više kartica preglednika sada se sinkronizira uživo — označiš li park u jednoj, ostale se odmah osvježe (i nema gaženja napretka među karticama)."],
       "0.17.0": ["🤝 Igrajte zajedno — otvori sobu, podijeli kôd s prijateljima i gledajte napredak jedni drugih uživo dok skupljate park-šume. Veza ide izravno među preglednicima (P2P, bez servera)."],
       "0.16.0": ["🎟 Kad otvoriš tuđu „Kamo dalje?” poveznicu — pojavi se modal s parkom koji prijatelj sprema posjetiti i gumb da i tebi postane cilj jednim dodirom."],
       "0.15.0": ["🏘️ Dodirni značku četvrti pod karticom i otvorit će se popis park-šuma u toj četvrti s oznakom posjećenosti; klik na park ga centrira na karti.", "🧹 Uklonjena ikona 📍 s polja na kartici — polje je sad cijelo dostupno za prijavu."],
@@ -197,6 +199,7 @@ const STRINGS = {
     "toast.locFail": "Couldn’t get location — honor mode (tap to mark)",
     "toast.noGeo": "Geolocation not supported — staying in honor mode",
     "toast.reset": "Progress reset 🌱", "toast.goalSet": "🎯 Goal set: {name}",
+    "sync.updated": "🔄 Synced from another tab",
     "reset.confirm": "Reset all progress?\n\nThis clears every visited park, your goal, and earned milestones. It cannot be undone.",
     "cel.destinyTitle": "Destiny reached!", "cel.destinyMsg": "You made it to your goal: {name}!",
     "cel.bingoMsg": "You linked up 5 forest parks in a line — bonus!",
@@ -222,6 +225,7 @@ const STRINGS = {
         <li><strong>🔀 New card</strong> reshuffles the board. Progress saves automatically.</li>
       </ul>`,
     "changelog": {
+      "0.18.0": ["🔄 Multiple browser tabs now stay in sync live — mark a park in one and the others refresh instantly (and no more clobbering progress between tabs)."],
       "0.17.0": ["🤝 Play together — open a room, share the code with friends, and watch each other’s progress live as you collect park-šume. The connection is browser-to-browser (P2P, no server)."],
       "0.16.0": ["🎟 Opening a friend's “Where to next?” link now pops a modal with the park they're heading for and a one-tap button to make it your goal too."],
       "0.15.0": ["🏘️ Tap a district chip under the card to open a list of the park-šume in that district with visited markers; clicking a park centers it on the map.", "🧹 Removed the 📍 icon from card tiles — the whole tile is now the check-in target."],

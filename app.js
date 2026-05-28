@@ -6,7 +6,7 @@ const FREE = 12;                          // center cell of the 5×5
 const STORAGE_KEY = "parkSumaBingo:v2";
 const SEEN_VERSION_KEY = "parkSumaBingo:seenVersion";
 const CHECKIN_M = 300;                     // GPS check-in radius (metres)
-const APP_VERSION = "0.17.0";             // single source of truth for the version
+const APP_VERSION = "0.18.0";             // single source of truth for the version
 
 // Level ladder — names are i18n keys (tier.<key>); thresholds are counts.
 const TIERS = [
@@ -21,7 +21,7 @@ const TIERS = [
 function tierName(t){ return tr('tier.' + t.key); }
 
 // Versions (newest first) for the "What's new" tab; notes live in i18n.
-const CHANGELOG_VERSIONS = ["0.17.0","0.16.0","0.15.0","0.14.0","0.13.0","0.12.0","0.11.0","0.10.0","0.9.0","0.8.0","0.7.0","0.6.0","0.5.0","0.4.0","0.3.0","0.2.0","0.1.0"];
+const CHANGELOG_VERSIONS = ["0.18.0","0.17.0","0.16.0","0.15.0","0.14.0","0.13.0","0.12.0","0.11.0","0.10.0","0.9.0","0.8.0","0.7.0","0.6.0","0.5.0","0.4.0","0.3.0","0.2.0","0.1.0"];
 
 // ---- DOM ----
 const $ = id => document.getElementById(id);
@@ -99,10 +99,17 @@ function load(){
       seenTiers: Array.isArray(s.seenTiers) ? s.seenTiers : [],
       seenAreaTiers: Array.isArray(s.seenAreaTiers) ? s.seenAreaTiers : [],
       seenDistricts: Array.isArray(s.seenDistricts) ? s.seenDistricts : [],
+      _rev: (typeof s._rev === 'number' && s._rev >= 0) ? s._rev : 0,
     };
-  } catch(e){ return { visited:{}, order:null, name:'', mode:'count', goal:null, seenTiers:[], seenAreaTiers:[], seenDistricts:[] }; }
+  } catch(e){ return { visited:{}, order:null, name:'', mode:'count', goal:null, seenTiers:[], seenAreaTiers:[], seenDistricts:[], _rev:0 }; }
 }
-function save(){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){} }
+// Bump a monotonic revision on every write so sibling tabs can tell whose state
+// is newer (see sync.js). The post-write hook lets sync.js notify other tabs.
+function save(){
+  state._rev = (state._rev || 0) + 1;
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){}
+  if (window.syncBroadcast) window.syncBroadcast(state._rev);
+}
 
 let state = load();
 
