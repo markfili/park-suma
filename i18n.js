@@ -91,6 +91,7 @@ const STRINGS = {
     "toast.noGeo": "Geolokacija nije podržana — ostajem na povjerenje",
     "toast.reset": "Napredak poništen 🌱", "toast.goalSet": "🎯 Cilj postavljen: {name}",
     "sync.updated": "🔄 Ažurirano iz drugog taba",
+    "update.available": "🌱 Nova verzija dostupna", "update.reload": "Osvježi",
     "reset.confirm": "Poništiti sav napredak?\n\nObrisat će se svi posjećeni parkovi, cilj i osvojene razine. Nije moguće poništiti.",
     "cel.destinyTitle": "Cilj dosegnut!", "cel.destinyMsg": "Stigao si do svog cilja: {name}!",
     "cel.bingoMsg": "Povezao si 5 park-šuma u nizu — bonus!",
@@ -116,6 +117,7 @@ const STRINGS = {
         <li><strong>🔀 Nova kartica</strong> premiješava ploču. Napredak se sprema automatski.</li>
       </ul>`,
     "changelog": {
+      "0.20.0": ["🌱 Obavijest o novoj verziji — ako ti je aplikacija dugo otvorena, pojavit će se nenametljiva traka „Nova verzija dostupna” s gumbom Osvježi čim objavimo novost."],
       "0.19.0": ["🏅 Bedževi — skupljaj nagrade dok istražuješ: Prvi korak, Ranoranilac, Noćna sova, Šumski sprinter, Zagrljaj diva, Mrvica, Na časnu riječ, Nismo sami… i jedan skriveni 🦔. Pogledaj ih u ℹ️ → Bedževi; pojavljuju se i na slici za dijeljenje."],
       "0.18.0": ["🔄 Više kartica preglednika sada se sinkronizira uživo — označiš li park u jednoj, ostale se odmah osvježe (i nema gaženja napretka među karticama)."],
       "0.17.0": ["🤝 Igrajte zajedno — otvori sobu, podijeli kôd s prijateljima i gledajte napredak jedni drugih uživo dok skupljate park-šume. Veza ide izravno među preglednicima (P2P, bez servera)."],
@@ -225,6 +227,7 @@ const STRINGS = {
     "toast.noGeo": "Geolocation not supported — staying in honor mode",
     "toast.reset": "Progress reset 🌱", "toast.goalSet": "🎯 Goal set: {name}",
     "sync.updated": "🔄 Synced from another tab",
+    "update.available": "🌱 New version available", "update.reload": "Refresh",
     "reset.confirm": "Reset all progress?\n\nThis clears every visited park, your goal, and earned milestones. It cannot be undone.",
     "cel.destinyTitle": "Destiny reached!", "cel.destinyMsg": "You made it to your goal: {name}!",
     "cel.bingoMsg": "You linked up 5 forest parks in a line — bonus!",
@@ -250,6 +253,7 @@ const STRINGS = {
         <li><strong>🔀 New card</strong> reshuffles the board. Progress saves automatically.</li>
       </ul>`,
     "changelog": {
+      "0.20.0": ["🌱 New-version notice — if you leave the app open a long time, an unobtrusive “New version available” bar with a Refresh button appears as soon as we ship an update."],
       "0.19.0": ["🏅 Badges — collect rewards as you explore: First step, Early bird, Night owl, Forest sprinter, Hug the giant, The crumb, Scout’s honor, Not alone… and one hidden 🦔. See them in ℹ️ → Badges; they also show up on your share image."],
       "0.18.0": ["🔄 Multiple browser tabs now stay in sync live — mark a park in one and the others refresh instantly (and no more clobbering progress between tabs)."],
       "0.17.0": ["🤝 Play together — open a room, share the code with friends, and watch each other’s progress live as you collect park-šume. The connection is browser-to-browser (P2P, no server)."],

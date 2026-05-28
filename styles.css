@@ -272,6 +272,19 @@ footer { color: var(--mint-dim); font-size: .72rem; margin-top: 18px; text-align
 .tg-bar-fill { display: block; height: 100%; background: linear-gradient(90deg, var(--tile-marked), var(--gold)); }
 .tg-count { flex: none; min-width: 58px; text-align: right; font-size: .78rem; color: var(--gold); font-variant-numeric: tabular-nums; }
 
+/* ---- new-version nudge ---- */
+.updbar {
+  position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%) translateY(150%);
+  display: flex; align-items: center; gap: 10px; z-index: 1200; max-width: 92vw;
+  background: var(--tile-marked); color: #06281c; font-weight: 700;
+  padding: 9px 8px 9px 16px; border-radius: 999px; box-shadow: 0 6px 24px rgba(0,0,0,.35);
+  opacity: 0; transition: transform .3s ease, opacity .3s ease;
+}
+.updbar.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+.updbar button { font: inherit; font-weight: 700; border: none; cursor: pointer; border-radius: 999px; }
+#updReload { background: #06281c; color: var(--mint); padding: 6px 14px; }
+.updbar-x { background: transparent; color: #06281c; padding: 4px 8px; font-size: 1rem; }
+
 /* ---- badges (badge case) ---- */
 .badge-count { text-align: center; color: var(--gold); font-weight: 700; margin-bottom: 12px; }
 .badge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }

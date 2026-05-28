@@ -34,17 +34,23 @@ This box is **Debian running as a proot/chroot userland on Android**. Consequenc
 index.html     markup + data-i18n attrs; chained <script> loader (order matters)
 styles.css     all styling
 i18n.js        tr() + STRINGS{hr,en}; lang persistence (loads BEFORE app.js)
-app.js         core game logic, state, map, progression, help modal
+app.js         core game logic, state (+ _rev), map, progression, help modal, badge hooks
+badges.js      collectible achievements — registry + evaluate + badge case
 scratch.js     "Where to next?" scratch-card goal picker
-share.js       username + link/image stats sharing
+share.js       username + link/image stats sharing (+ earned-badge flair on the image)
 bikes.js       toggleable nextbike station layer
+together.js    P2P "Play together" — live shared leaderboard over WebRTC (PeerJS, lazy)
+sync.js        live state sync across same-browser tabs (BroadcastChannel + storage)
+update.js      polls version.json; nudges a long-open tab to reload on a new release
 parks.js       the 24 parks: {name,lat,lon,district,ha?}
 parks.geojson  21 OSM boundary polygons (name + ha)
+version.json   { "version": APP_VERSION } — deployed-version manifest update.js polls
 .nojekyll      serve files verbatim on Pages
 ```
 
 **Script load order (in index.html, chained via onload):**
-`leaflet (CDN) → parks.js → i18n.js → app.js → scratch.js → share.js → bikes.js`.
+`leaflet (CDN) → parks.js → i18n.js → app.js → badges.js → scratch.js → share.js →
+bikes.js → together.js → sync.js → update.js`.
 All are classic scripts sharing one global scope: top-level `const`/`let`/`function`
 in one file are visible to later files (e.g. `PARKS`, `tr`, `map`, `isVisited`,
 `state`). Modules reach back into app.js globals and expose `window.*Relabel` /
@@ -59,9 +65,10 @@ in one file are visible to later files (e.g. `PARKS`, `tr`, `map`, `isVisited`,
   `v<APP_VERSION>` + the **live commit SHA** (fetched from the GitHub API).
   `maybeShowWhatsNew()` auto-opens the help "What's new" tab when `APP_VERSION`
   differs from `localStorage parkSumaBingo:seenVersion`.
-  - **To release a feature:** bump `APP_VERSION`, add the version to
-    `CHANGELOG_VERSIONS` (app.js), and add notes under `changelog` in **both** `hr`
-    and `en` in `i18n.js`. Also bump the `<span id="appVer">` default in index.html.
+  - **To release a feature (5 spots):** bump `APP_VERSION` (app.js), add the version
+    to `CHANGELOG_VERSIONS` (app.js), add notes under `changelog` in **both** `hr` and
+    `en` (i18n.js), bump the `<span id="appVer">` default (index.html), and bump
+    `version.json` (drives the in-app "new version available" nudge — see update.js).
   - **Do NOT bump version for pure data/cosmetic fixes** — it triggers a spurious
     What's-new popup. (Marker repositioning, layout tweaks = no bump.)
 - **i18n:** `tr(key, params)` over `STRINGS.hr` / `STRINGS.en` (default **hr**, stored
@@ -112,7 +119,15 @@ python3 -c "s=open('app.js').read();print(all(s.count(a)==s.count(b) for a,b in 
 Bingo card + map (Leaflet/OSM, Card⇄Map toggle, boundary polygons) · GPS check-in
 (≤300 m, honor-mode fallback, nearest-unvisited hint) · levels (count + size modes)
 + bingo-line bonus + district sweeps · scratch-card 🎯 goal · username + link/image
-sharing · nextbike layer · reset · help/changelog modal · HR/EN switcher (hr default).
+sharing · nextbike layer · reset · help/changelog modal · HR/EN switcher (hr default)
+· 🏅 badges (collectible achievements + badge case) · 🤝 P2P "Play together" (live
+shared leaderboard over WebRTC, no backend) · 🔄 live tab sync · 🌱 new-version nudge.
 
-Ideas not yet built: photo mementos per park, real cross-user leaderboard (needs a
-free backend), hole/inner-ring polygon rendering, polygons for the 3 missing parks.
+**No-backend networking note:** "Play together" (together.js) signals through the
+**public PeerJS cloud broker**; game data is direct browser-to-browser. Fine for a
+demo, but it's a third-party dependency — self-host a PeerServer / add TURN if it
+ever goes beyond demo use.
+
+Ideas not yet built: photo mementos per park, badge *perks* (badges that change play,
+e.g. a free re-roll / unlockable card color), more badges, hole/inner-ring polygon
+rendering, polygons for the 3 missing parks, optional PWA/offline (service worker).

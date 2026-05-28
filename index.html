@@ -76,7 +76,7 @@
   <footer>
     <span data-i18n="footer.tagline">24 zaštićene park-šume grada Zagreba</span> · 🟢 greengo demo ·
     <span id="gpsStatus"></span><br>
-    <span class="ver"><span id="appVer">v0.19.0</span> <span id="sha"></span></span>
+    <span class="ver"><span id="appVer">v0.20.0</span> <span id="sha"></span></span>
     <span class="lang" id="langToggle"><button data-lang="hr">HR</button><button data-lang="en">EN</button></span>
   </footer>
 
@@ -220,6 +220,13 @@
     </div>
   </div>
 
+  <!-- new-version available nudge (update.js) -->
+  <div class="updbar" id="updateBar" hidden role="status" aria-live="polite">
+    <span data-i18n="update.available">🌱 Nova verzija dostupna</span>
+    <button id="updReload" data-i18n="update.reload">Osvježi</button>
+    <button id="updDismiss" class="updbar-x" aria-label="✕">✕</button>
+  </div>
+
   <div class="toast" id="toast"></div>
 
   <!-- Leaflet, then data, then i18n, then app + modules — after the DOM exists. -->
@@ -238,7 +245,7 @@
         load('i18n.js', function () {
           load('app.js', function () {
             load('badges.js', function () {
-              load('scratch.js', function () { load('share.js', function () { load('bikes.js', function () { load('together.js', function () { load('sync.js'); }); }); }); });
+              load('scratch.js', function () { load('share.js', function () { load('bikes.js', function () { load('together.js', function () { load('sync.js', function () { load('update.js'); }); }); }); }); });
             });
           });
         });
