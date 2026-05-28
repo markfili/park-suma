@@ -129,6 +129,7 @@
       note.className = 'together-status'; note.textContent = tr('together.alone');
       el.roster.appendChild(note);
     }
+    if (roster.size >= 2 && window.evaluateBadges) window.evaluateBadges({ event: 'together', players: roster.size });
   }
 
   // Toast every park that flipped on for a given peer (never for myself).

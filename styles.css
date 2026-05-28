@@ -272,6 +272,15 @@ footer { color: var(--mint-dim); font-size: .72rem; margin-top: 18px; text-align
 .tg-bar-fill { display: block; height: 100%; background: linear-gradient(90deg, var(--tile-marked), var(--gold)); }
 .tg-count { flex: none; min-width: 58px; text-align: right; font-size: .78rem; color: var(--gold); font-variant-numeric: tabular-nums; }
 
+/* ---- badges (badge case) ---- */
+.badge-count { text-align: center; color: var(--gold); font-weight: 700; margin-bottom: 12px; }
+.badge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.badge { background: var(--bg2); border: 1px solid var(--line); border-radius: 12px; padding: 10px 8px; text-align: center; }
+.badge.locked { opacity: .45; filter: grayscale(1); }
+.badge-emoji { font-size: 1.7rem; line-height: 1; }
+.badge-name { font-size: .74rem; font-weight: 700; color: var(--mint); margin-top: 6px; }
+.badge-desc { font-size: .66rem; color: var(--mint-dim); line-height: 1.25; margin-top: 3px; }
+
 /* ---- goal ---- */
 .goal-chip { color: var(--gold); font-weight: 600; }
 .cell.goal { box-shadow: 0 0 0 2px var(--gold) inset; animation: goalpulse 1.5s ease-in-out infinite; }
@@ -401,12 +410,12 @@ button:disabled { opacity: .45; cursor: default; }
 
 /* ---- help / what's new ---- */
 .help-tabs {
-  display: flex; gap: 6px; justify-content: center; margin-bottom: 14px;
+  display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 14px;
   background: var(--bg2); border: 1px solid var(--line); border-radius: 999px; padding: 3px;
 }
 .help-tab {
   background: transparent; color: var(--mint-dim); border: none; border-radius: 999px;
-  padding: 7px 14px; font-weight: 700; font-size: .85rem; cursor: pointer;
+  padding: 7px 12px; font-weight: 700; font-size: .82rem; cursor: pointer; white-space: nowrap;
 }
 .help-tab.active { background: var(--mint); color: #06281c; }
 .help-body { text-align: left; font-size: .85rem; line-height: 1.45; max-height: 60vh; overflow: auto; }

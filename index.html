@@ -76,7 +76,7 @@
   <footer>
     <span data-i18n="footer.tagline">24 zaštićene park-šume grada Zagreba</span> · 🟢 greengo demo ·
     <span id="gpsStatus"></span><br>
-    <span class="ver"><span id="appVer">v0.18.0</span> <span id="sha"></span></span>
+    <span class="ver"><span id="appVer">v0.19.0</span> <span id="sha"></span></span>
     <span class="lang" id="langToggle"><button data-lang="hr">HR</button><button data-lang="en">EN</button></span>
   </footer>
 
@@ -139,6 +139,7 @@
       <div class="help-tabs" id="helpTabs">
         <button class="help-tab active" data-tab="howto" data-i18n="help.howto">Kako igrati</button>
         <button class="help-tab" data-tab="news" data-i18n="help.news">Novosti</button>
+        <button class="help-tab" data-tab="badges" data-i18n="help.badges">🏅 Bedževi</button>
       </div>
       <div class="help-body" id="helpBody"></div>
     </div>
@@ -236,7 +237,9 @@
       load('parks.js', function () {
         load('i18n.js', function () {
           load('app.js', function () {
-            load('scratch.js', function () { load('share.js', function () { load('bikes.js', function () { load('together.js', function () { load('sync.js'); }); }); }); });
+            load('badges.js', function () {
+              load('scratch.js', function () { load('share.js', function () { load('bikes.js', function () { load('together.js', function () { load('sync.js'); }); }); }); });
+            });
           });
         });
       });

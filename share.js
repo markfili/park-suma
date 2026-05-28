@@ -57,6 +57,12 @@
     x.fillText(st.count + ' / 24', W / 2, 168);
     x.fillStyle = '#7fcfa3'; x.font = '18px system-ui, sans-serif';
     x.fillText(tr('share.imgSwept', { swept: st.swept, ha: st.ha }), W / 2, 200);
+    // Earned-badge flair (own card only; reads the live local state).
+    const myBadges = (window.badgeEmojisFor && Array.isArray(state.badges)) ? window.badgeEmojisFor(state.badges) : [];
+    if (myBadges.length) {
+      x.font = '20px system-ui, sans-serif';
+      x.fillText('🏅 ' + myBadges.join(' '), W / 2, 224);
+    }
     const cols = 12, r = 9, gap = 30, startX = W / 2 - (cols - 1) * gap / 2, startY = 240;
     NAMES.forEach((n, i) => {
       const cx = startX + (i % cols) * gap, cy = startY + Math.floor(i / cols) * gap;

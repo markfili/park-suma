@@ -6,7 +6,7 @@ const FREE = 12;                          // center cell of the 5×5
 const STORAGE_KEY = "parkSumaBingo:v2";
 const SEEN_VERSION_KEY = "parkSumaBingo:seenVersion";
 const CHECKIN_M = 300;                     // GPS check-in radius (metres)
-const APP_VERSION = "0.18.0";             // single source of truth for the version
+const APP_VERSION = "0.19.0";             // single source of truth for the version
 
 // Level ladder — names are i18n keys (tier.<key>); thresholds are counts.
 const TIERS = [
@@ -21,7 +21,7 @@ const TIERS = [
 function tierName(t){ return tr('tier.' + t.key); }
 
 // Versions (newest first) for the "What's new" tab; notes live in i18n.
-const CHANGELOG_VERSIONS = ["0.18.0","0.17.0","0.16.0","0.15.0","0.14.0","0.13.0","0.12.0","0.11.0","0.10.0","0.9.0","0.8.0","0.7.0","0.6.0","0.5.0","0.4.0","0.3.0","0.2.0","0.1.0"];
+const CHANGELOG_VERSIONS = ["0.19.0","0.18.0","0.17.0","0.16.0","0.15.0","0.14.0","0.13.0","0.12.0","0.11.0","0.10.0","0.9.0","0.8.0","0.7.0","0.6.0","0.5.0","0.4.0","0.3.0","0.2.0","0.1.0"];
 
 // ---- DOM ----
 const $ = id => document.getElementById(id);
@@ -99,9 +99,11 @@ function load(){
       seenTiers: Array.isArray(s.seenTiers) ? s.seenTiers : [],
       seenAreaTiers: Array.isArray(s.seenAreaTiers) ? s.seenAreaTiers : [],
       seenDistricts: Array.isArray(s.seenDistricts) ? s.seenDistricts : [],
+      badges: Array.isArray(s.badges) ? s.badges.filter(x => typeof x === 'string') : [],
+      badgeStats: (s.badgeStats && typeof s.badgeStats === 'object') ? s.badgeStats : {},
       _rev: (typeof s._rev === 'number' && s._rev >= 0) ? s._rev : 0,
     };
-  } catch(e){ return { visited:{}, order:null, name:'', mode:'count', goal:null, seenTiers:[], seenAreaTiers:[], seenDistricts:[], _rev:0 }; }
+  } catch(e){ return { visited:{}, order:null, name:'', mode:'count', goal:null, seenTiers:[], seenAreaTiers:[], seenDistricts:[], badges:[], badgeStats:{}, _rev:0 }; }
 }
 // Bump a monotonic revision on every write so sibling tabs can tell whose state
 // is newer (see sync.js). The post-write hook lets sync.js notify other tabs.
@@ -125,6 +127,7 @@ function completesDistrict(name){
 function resetProgress(){
   if (!confirm(tr('reset.confirm'))) return;
   state.visited = {}; state.goal = null; state.seenTiers = []; state.seenAreaTiers = []; state.seenDistricts = [];
+  state.badges = []; state.badgeStats = {};
   save();
   if (window.togetherSync) window.togetherSync();
   buildCard(false);
@@ -157,6 +160,7 @@ function buildCard(fresh){
     cell.className = 'cell';
     if (i === FREE) {
       cell.classList.add('free','marked'); cell.textContent = '🟢'; cellNames.push(null);
+      cell.addEventListener('click', () => { if (window.onFreeCellTap) window.onFreeCellTap(cell); });
     } else {
       const name = order[p++]; cellNames.push(name);
       cell.dataset.name = name; cell.textContent = name;
@@ -249,6 +253,7 @@ function celebrate(name){
     state.seenTiers.push(24); save();
     queueBanner("🏆", tr('cel.championTitle'), tr('cel.championMsg'));
   }
+  if (window.evaluateBadges) window.evaluateBadges({ event: 'checkin', name, on: true, gpsActive });
   flushBanners();
 }
 
@@ -472,6 +477,8 @@ function renderHelp(tab){
     body.innerHTML = CHANGELOG_VERSIONS.map((v, i) =>
       `<div class="cl${i === 0 ? ' cur' : ''}"><h4>v${v}${i === 0 ? ' · ' + tr('help.current') : ''}</h4><ul>` +
       ((cl[v] || []).map(n => `<li>${n}</li>`).join('')) + `</ul></div>`).join('');
+  } else if (tab === 'badges') {
+    body.innerHTML = window.renderBadgesHtml ? window.renderBadgesHtml() : '';
   } else {
     body.innerHTML = tr('howto', { m: CHECKIN_M });
   }
