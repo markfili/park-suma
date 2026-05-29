@@ -24,7 +24,21 @@
   const CODE_LEN = 4;
   const PROTO = 1;                            // wire-format version
 
-  let peer = null, isHost = false, roomCode = null, myId = null, seeded = false;
+  // STUN finds a direct path; TURN relays when NAT/firewalls block one (devices on
+  // different networks, cellular/CGNAT). Free public TURN (best-effort) + Google
+  // STUN, passed to every Peer via { config }. For real use, prefer a dedicated
+  // TURN (self-hosted coturn / Metered API key).
+  const ICE_SERVERS = [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:80?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turns:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
+  ];
+  const PEER_OPTS = { config: { iceServers: ICE_SERVERS } };
+  const CONNECT_TIMEOUT = 12000;              // ms before we stop waiting + surface an error
+
+  let peer = null, isHost = false, roomCode = null, myId = null, seeded = false, connectTimer = null;
   const conns = new Map();        // host: remotePeerId -> DataConnection
   let hostConn = null;            // joiner: the single connection to the host
   const roster = new Map();       // id -> { name, mask:[3 bytes], proto }
@@ -76,7 +90,7 @@
   const el = {
     modal: $('together'), lobby: $('tgLobby'), room: $('tgRoom'),
     name: $('tgName'), create: $('tgCreate'), code: $('tgCode'), join: $('tgJoin'),
-    status: $('tgStatus'), codeChip: $('tgCodeChip'), roster: $('tgRoster'), leave: $('tgLeave'),
+    status: $('tgStatus'), codeChip: $('tgCodeChip'), conn: $('tgConn'), roster: $('tgRoster'), leave: $('tgLeave'),
   };
 
   function setStatus(msg, kind) {
@@ -130,6 +144,7 @@
       el.roster.appendChild(note);
     }
     if (roster.size >= 2 && window.evaluateBadges) window.evaluateBadges({ event: 'together', players: roster.size });
+    if (el.conn) el.conn.textContent = tr('together.inRoom', { n: roster.size });
   }
 
   // Toast every park that flipped on for a given peer (never for myself).
@@ -201,22 +216,27 @@
   // ---- lifecycle ----
   function teardownPeer() { if (peer) { try { peer.destroy(); } catch (e) {} peer = null; } }
   function leave() {
+    clearTimeout(connectTimer);
     teardownPeer();
     conns.clear(); roster.clear(); prevMasks.clear();
     hostConn = null; isHost = false; roomCode = null; myId = null; seeded = false;
     showLobby();
   }
+  function failTo(msg) { leave(); setStatus(msg, 'err'); }   // give up → back to lobby with a reason
 
   function host() {
     busy(true); setStatus(tr('together.loadingLib'));
     loadPeerJS().then(() => startHost(0)).catch(() => { busy(false); setStatus(tr('together.libFail'), 'err'); });
   }
   function startHost(attempt) {
-    if (attempt > 4) { busy(false); setStatus(tr('together.netErr'), 'err'); return; }
+    if (attempt > 4) { failTo(tr('together.netErr')); return; }
+    clearTimeout(connectTimer);
     roomCode = randomCode(); isHost = true;
     setStatus(tr('together.connecting'));
-    peer = new Peer(PREFIX + roomCode);
+    peer = new Peer(PREFIX + roomCode, PEER_OPTS);
+    connectTimer = setTimeout(() => { if (!myId) failTo(tr('together.timeout')); }, CONNECT_TIMEOUT);
     peer.on('open', id => {
+      clearTimeout(connectTimer);
       myId = id; seeded = true;
       roster.set(myId, { name: myName(), mask: myMask(), proto: PROTO });
       prevMasks.set(myId, myMask());
@@ -225,7 +245,7 @@
     peer.on('connection', setupHostConn);
     peer.on('error', err => {
       if (err && err.type === 'unavailable-id') { teardownPeer(); startHost(attempt + 1); return; }
-      busy(false); setStatus(tr('together.netErr'), 'err');
+      clearTimeout(connectTimer); busy(false); setStatus(tr('together.netErr'), 'err');
     });
     peer.on('disconnected', () => { try { peer.reconnect(); } catch (e) {} });
   }
@@ -238,19 +258,23 @@
   }
   function startJoin(code) {
     roomCode = code; isHost = false; seeded = false;
+    clearTimeout(connectTimer);
     setStatus(tr('together.connecting'));
-    peer = new Peer();
+    peer = new Peer(undefined, PEER_OPTS);
+    // Covers the slow/failing leg (ICE) where no error event ever fires.
+    connectTimer = setTimeout(() => { if (!hostConn || !hostConn.open) failTo(tr('together.timeout')); }, CONNECT_TIMEOUT);
     peer.on('open', id => {
       myId = id;
+      setStatus(tr('together.findingHost'));
       const conn = peer.connect(PREFIX + code, { reliable: true });
       hostConn = conn;
-      conn.on('open', () => { showRoom(); setStatus(''); toast(tr('together.joined')); pushUpdate(); });
+      conn.on('open', () => { clearTimeout(connectTimer); showRoom(); setStatus(''); toast(tr('together.joined')); pushUpdate(); });
       conn.on('data', d => { if (d && d.t === 'roster') ingestRoster(d.list); });
       conn.on('close', () => { leave(); setStatus(tr('together.hostLeft'), 'err'); });
-      conn.on('error', () => { busy(false); setStatus(tr('together.netErr'), 'err'); });
+      conn.on('error', () => { failTo(tr('together.netErr')); });
     });
     peer.on('error', err => {
-      busy(false);
+      clearTimeout(connectTimer); busy(false);
       setStatus(err && err.type === 'peer-unavailable' ? tr('together.notFound') : tr('together.netErr'), 'err');
     });
     peer.on('disconnected', () => { try { peer.reconnect(); } catch (e) {} });

@@ -64,6 +64,8 @@ const STRINGS = {
     "together.alone": "Čekamo da se prijatelji pridruže…",
     "together.loadingLib": "Učitavam P2P…", "together.connecting": "Povezivanje…",
     "together.hosting": "Soba otvorena — podijeli kôd! 🤝", "together.joined": "Povezano! 🤝",
+    "together.findingHost": "Tražim sobu…", "together.inRoom": "🟢 U sobi · {n} igrača",
+    "together.timeout": "Ne mogu se povezati — provjeri kôd ili probaj istu Wi-Fi mrežu.",
     "together.notFound": "Soba nije pronađena — provjeri kôd.",
     "together.badCode": "Upiši 4-znamenkasti kôd.",
     "together.libFail": "Ne mogu učitati P2P (offline?).",
@@ -117,6 +119,7 @@ const STRINGS = {
         <li><strong>🔀 Nova kartica</strong> premiješava ploču. Napredak se sprema automatski.</li>
       </ul>`,
     "changelog": {
+      "0.21.0": ["🤝 „Igrajte zajedno” sada radi i kad ste na različitim mrežama — dodani su TURN poslužitelji za prijenos kad izravna veza ne uspije. Spajanje ima vremensko ograničenje i jasnu poruku umjesto vječnog vrtenja, a soba prikazuje stanje veze."],
       "0.20.0": ["🌱 Obavijest o novoj verziji — ako ti je aplikacija dugo otvorena, pojavit će se nenametljiva traka „Nova verzija dostupna” s gumbom Osvježi čim objavimo novost."],
       "0.19.0": ["🏅 Bedževi — skupljaj nagrade dok istražuješ: Prvi korak, Ranoranilac, Noćna sova, Šumski sprinter, Zagrljaj diva, Mrvica, Na časnu riječ, Nismo sami… i jedan skriveni 🦔. Pogledaj ih u ℹ️ → Bedževi; pojavljuju se i na slici za dijeljenje."],
       "0.18.0": ["🔄 Više kartica preglednika sada se sinkronizira uživo — označiš li park u jednoj, ostale se odmah osvježe (i nema gaženja napretka među karticama)."],
@@ -200,6 +203,8 @@ const STRINGS = {
     "together.alone": "Waiting for friends to join…",
     "together.loadingLib": "Loading P2P…", "together.connecting": "Connecting…",
     "together.hosting": "Room open — share the code! 🤝", "together.joined": "Connected! 🤝",
+    "together.findingHost": "Finding the room…", "together.inRoom": "🟢 In room · {n}",
+    "together.timeout": "Couldn’t connect — check the code, or try the same Wi-Fi.",
     "together.notFound": "Room not found — check the code.",
     "together.badCode": "Enter the 4-character code.",
     "together.libFail": "Couldn’t load P2P (offline?).",
@@ -253,6 +258,7 @@ const STRINGS = {
         <li><strong>🔀 New card</strong> reshuffles the board. Progress saves automatically.</li>
       </ul>`,
     "changelog": {
+      "0.21.0": ["🤝 “Play together” now works across different networks — TURN relay servers were added for when a direct connection can’t form. Joining now times out with a clear message instead of spinning forever, and the room shows connection status."],
       "0.20.0": ["🌱 New-version notice — if you leave the app open a long time, an unobtrusive “New version available” bar with a Refresh button appears as soon as we ship an update."],
       "0.19.0": ["🏅 Badges — collect rewards as you explore: First step, Early bird, Night owl, Forest sprinter, Hug the giant, The crumb, Scout’s honor, Not alone… and one hidden 🦔. See them in ℹ️ → Badges; they also show up on your share image."],
       "0.18.0": ["🔄 Multiple browser tabs now stay in sync live — mark a park in one and the others refresh instantly (and no more clobbering progress between tabs)."],

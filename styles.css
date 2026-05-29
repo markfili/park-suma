@@ -263,6 +263,7 @@ footer { color: var(--mint-dim); font-size: .72rem; margin-top: 18px; text-align
   background: var(--bg2); color: var(--gold); border: 1px solid var(--line);
   border-radius: 10px; padding: 6px 4px 6px 14px; cursor: pointer;
 }
+.together-conn { font-size: .78rem; color: var(--mint-dim); margin: -6px 0 10px; }
 .together-roster { display: flex; flex-direction: column; gap: 8px; margin: 4px 0 6px; text-align: left; }
 .tg-player { display: flex; align-items: center; gap: 8px; }
 .tg-player.me .tg-name { color: var(--mint); font-weight: 700; }

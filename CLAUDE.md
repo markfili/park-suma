@@ -124,9 +124,10 @@ sharing · nextbike layer · reset · help/changelog modal · HR/EN switcher (hr
 shared leaderboard over WebRTC, no backend) · 🔄 live tab sync · 🌱 new-version nudge.
 
 **No-backend networking note:** "Play together" (together.js) signals through the
-**public PeerJS cloud broker**; game data is direct browser-to-browser. Fine for a
-demo, but it's a third-party dependency — self-host a PeerServer / add TURN if it
-ever goes beyond demo use.
+**public PeerJS cloud broker**; game data is direct browser-to-browser, with STUN +
+free **OpenRelay TURN** (`ICE_SERVERS`) so it works across different networks. Both
+the broker and that free TURN are best-effort third parties — for real use, plug in
+a dedicated TURN (self-hosted coturn / Metered API key) and/or self-host PeerServer.
 
 Ideas not yet built: photo mementos per park, badge *perks* (badges that change play,
 e.g. a free re-roll / unlockable card color), more badges, hole/inner-ring polygon
