@@ -274,17 +274,24 @@
         setTimeout(resolve, 120);
         return;
       }
-      strip.style.transition = 'transform ' + durMs + 'ms cubic-bezier(.16,.84,.3,1)';
-      strip.style.transform = 'translateY(' + targetY + 'px)';
-      let done = false;
-      const onEnd = () => {
-        if (done) return; done = true;
-        strip.removeEventListener('transitionend', onEnd);
-        resolve();
-      };
-      strip.addEventListener('transitionend', onEnd);
-      // Safety net in case transitionend never fires (interrupted, tab hidden).
-      setTimeout(onEnd, durMs + 200);
+      // Chrome on Android otherwise fuses the resetSlot() baseline
+      // (transition:none, translateY(0)) with the target set below into a
+      // single style commit and skips the animation — reels snap straight
+      // to the jackpot. A rAF here guarantees the baseline frame paints
+      // before the transition target is observed, so the transition fires.
+      requestAnimationFrame(() => {
+        strip.style.transition = 'transform ' + durMs + 'ms cubic-bezier(.16,.84,.3,1)';
+        strip.style.transform = 'translateY(' + targetY + 'px)';
+        let done = false;
+        const onEnd = () => {
+          if (done) return; done = true;
+          strip.removeEventListener('transitionend', onEnd);
+          resolve();
+        };
+        strip.addEventListener('transitionend', onEnd);
+        // Safety net in case transitionend never fires (interrupted, tab hidden).
+        setTimeout(onEnd, durMs + 200);
+      });
     });
   }
   async function runSlot() {
