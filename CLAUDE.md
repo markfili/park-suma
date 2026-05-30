@@ -5,7 +5,10 @@ park-šume (forest parks) of the City of Zagreb**. Visit parks to mark them, lev
 up, sweep districts, and hit BINGO. Dark-green + mint theme, 🟢 "greengo" branding.
 
 - **Repo:** `git@github.com:markfili/park-suma.git` (SSH remote, no token needed)
-- **Live:** https://markfili.github.io/park-suma/ (GitHub Pages, branch `main` / root)
+- **Live:** https://arilus.hr/park-suma/ (custom domain set in GitHub Pages settings —
+  no `CNAME` file in the repo). `https://markfili.github.io/park-suma/` **301s** to
+  arilus.hr, and the redirect itself is cached by Fastly (`x-cache: HIT`, age up to
+  ~20 min), so deploy-polling must hit the arilus.hr URL or it'll look stale.
 - **Local dir:** `~/greengo`
 
 ## Environment (important)
