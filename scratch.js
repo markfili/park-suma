@@ -362,17 +362,29 @@
     canvas.toBlob(blob => {
       if (!blob) { return; }
       const file = new File([blob], 'park-suma-next.png', { type: 'image/png' });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        navigator.share({ files: [file], title: 'Park-Šuma Bingo', text }).catch(() => {});
-      } else if (navigator.share) {
-        navigator.share({ title: 'Park-Šuma Bingo', text }).catch(() => {});
-      } else {
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob); a.download = 'park-suma-next.png'; a.click();
-        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-        if (navigator.clipboard) navigator.clipboard.writeText(text).catch(() => {});
-        toast(tr('share.imgSaved'));
-      }
+      // WhatsApp on Android silently drops the `text` field of a Web Share
+      // when files are attached — recipient gets the image with an empty
+      // caption, and our URL (carrying #u=&g=<idx> so they can adopt the
+      // same goal) goes with it. Pre-copy the caption to the clipboard so
+      // the user can long-press → paste it into WhatsApp's caption box.
+      // Apps that DO honor `text` (iMessage, Telegram, Signal, X) still
+      // auto-fill, so the clipboard is just a no-op fallback there.
+      const clipped = navigator.clipboard
+        ? navigator.clipboard.writeText(text).then(() => true).catch(() => false)
+        : Promise.resolve(false);
+      clipped.then(ok => {
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          if (ok) toast(tr('share.captionCopied'));
+          navigator.share({ files: [file], title: 'Park-Šuma Bingo', text }).catch(() => {});
+        } else if (navigator.share) {
+          navigator.share({ title: 'Park-Šuma Bingo', text }).catch(() => {});
+        } else {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob); a.download = 'park-suma-next.png'; a.click();
+          setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+          toast(tr('share.imgSaved'));
+        }
+      });
     }, 'image/png');
   });
 
