@@ -27,6 +27,8 @@ This box is **Debian running as a proot/chroot userland on Android**. Consequenc
 - **Deploy:** `git add -A && git commit && git push origin main`. Pages rebuilds in
   ~30–60s; the cache-buster (below) makes changes appear on the next refresh.
 - Commit messages end with: `Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>`
+- **`/deploy` skill** (`.claude/skills/deploy/`) automates the full flow: version
+  bump → local verify → commit → push → poll the live site. Use it to ship a release.
 
 ## Files
 
